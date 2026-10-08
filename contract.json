@@ -8,6 +8,7 @@
   "tools": [
     "apply_api_upgrade",
     "create_project",
+    "get_service_enablement_requirements",
     "get_service_integration_docs",
     "get_service_operations",
     "get_service_troubleshooting",
