@@ -30,19 +30,32 @@ action or replace the member's confirmation.
    environment values, credentials or git history.
 3. Call `list_project_services`. A service the project lacks is enabled by the
    member on the portal page the result links to.
-4. For a configured service, call `get_service_integration_docs` once with the
+4. Before that handoff, call `get_service_enablement_requirements` with the
+   exact `projectId` and `serviceCode`, the `identityKind` the member names (ask;
+   never guess) and their `language`. Explain only what it returns: the current
+   rules with their exact English and Arabic labels and pins, missing service
+   details and the exact issue codes. What the saved draft selected and what
+   this read relied on are separate facts; the saved draft's readiness, pins
+   and issues are history, and the current status is this read's assessment.
+   Pending, blocked and complete are guidance only: none enables, approves,
+   shares, submits or proves provider acceptance, a verified identity, legal
+   authority or eligibility for another service. An unavailable requirement
+   stays pending; promise no review, date or provider link. The member chooses
+   identity facts, adds service details and confirms sharing on the returned
+   portal link.
+5. For a configured service, call `get_service_integration_docs` once with the
    `integrationDocs` arguments from `list_project_services`. Keep the project,
    environment, service, capability and contract values exactly; set `stack` to
    the app's server-side stack and `language` to the member's language. The
    guide already includes the operations and troubleshooting, so do not call
    `get_service_operations` or `get_service_troubleshooting` for it afterwards.
-5. If no suitable project exists, `create_project` creates one sandbox project.
+6. If no suitable project exists, `create_project` creates one sandbox project.
    On a retry, reuse the same `idempotencyKey`.
-6. API upgrades (`inspect_api_upgrade`, `preview_api_upgrade`,
+7. API upgrades (`inspect_api_upgrade`, `preview_api_upgrade`,
    `prepare_api_upgrade`, `apply_api_upgrade`, `rollback_api_upgrade`) may change
    production only after the member confirms the exact prepared plan and its
    rollback in this conversation.
-7. Call `list_notices` again after setup and before you hand back.
+8. Call `list_notices` again after setup and before you hand back.
 
 ## Member-only steps
 
