@@ -35,6 +35,10 @@ replace the member's confirmation.
    a tool (`open_enable_authentica_form`), open that card if this host shows
    cards; without cards, call `enable_authentica` only after the member confirms
    the settings from `get_authentica_enablement` in this chat.
+   Once Authentica is enabled, offer a free live test: open
+   `open_authentica_live_test_card` if this host shows cards, where the member
+   sends and verifies it; otherwise share its portal link. Never send a test
+   yourself.
 5. For a configured service, call `get_service_integration_docs` once with the
    `integrationDocs` arguments from `list_project_services`, setting `language`
    to the member's language. Keep the project, environment and service values
