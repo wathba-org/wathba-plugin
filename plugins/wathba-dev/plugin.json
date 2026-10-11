@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "wathba-dev",
-  "version": "2.0.4-dev.8",
-  "description": "Connect your coding agent to the Wathba development environment over MCP: projects, notices, pinned integration guides, sandbox project creation and member-confirmed API upgrades for Saudi payments, OTP/SMS, KYC, ZATCA e-invoicing and shipping.",
+  "version": "2.0.5-dev.9",
+  "description": "Connect your coding agent to the Wathba development environment over MCP: projects, notices, service docs, sandbox project creation and member-confirmed API upgrades for Saudi payments, OTP/SMS, KYC, ZATCA e-invoicing and shipping.",
   "author": {
     "name": "Wathba",
     "email": "juriba@wathba.sa",
@@ -26,7 +26,7 @@
       "interface": {
         "displayName": "Wathba Dev",
         "shortDescription": "Wathba DEV environment",
-        "longDescription": "Connect your coding agent to the Wathba development environment over MCP: projects, notices, pinned integration guides, sandbox project creation and member-confirmed API upgrades for Saudi payments, OTP/SMS, KYC, ZATCA e-invoicing and shipping.",
+        "longDescription": "Connect your coding agent to the Wathba development environment over MCP: projects, notices, service docs, sandbox project creation and member-confirmed API upgrades for Saudi payments, OTP/SMS, KYC, ZATCA e-invoicing and shipping.",
         "developerName": "Wathba",
         "category": "Developer Tools",
         "capabilities": [
