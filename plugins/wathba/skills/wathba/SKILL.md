@@ -28,26 +28,29 @@ replace the member's confirmation.
 2. To suggest services, build a bounded repository profile locally and call
    `recommend_services_for_repository`. Never send source code, file contents,
    environment values, credentials or git history.
-3. Call `list_project_services` and follow each service's `nextAction`. Never
+3. If no suitable project exists, `create_project` creates one sandbox project.
+   On a retry, reuse the same `idempotencyKey`.
+4. Call `list_project_services` and follow each service's `nextAction`. Never
    offer to enable a service whose action is the portal. When the action names
-   a listed tool, open its card if this host shows cards
-   (`open_enable_authentica_form`, then `open_create_api_key_card`); without
-   cards, call `enable_authentica` only after the member confirms the settings
-   from `get_authentica_enablement`. The member pastes the API key into the env
-   file, never this chat: add an empty placeholder and keep the file git-ignored.
-4. For a configured service, call `get_service_integration_docs` once with the
+   a tool (`open_enable_authentica_form`), open that card if this host shows
+   cards; without cards, call `enable_authentica` only after the member confirms
+   the settings from `get_authentica_enablement` in this chat.
+5. For a configured service, call `get_service_integration_docs` once with the
    `integrationDocs` arguments from `list_project_services`, setting `language`
    to the member's language. Keep the project, environment and service values
    exactly. The docs match the service's dated API version and cover its
    operations, limits and troubleshooting. Their examples are plain HTTP; write
    the code in the app's server-side language.
-5. If no suitable project exists, `create_project` creates one sandbox project.
-   On a retry, reuse the same `idempotencyKey`.
-6. API upgrades (`inspect_api_upgrade`, `preview_api_upgrade`,
+6. After Authentica is enabled and you have read its docs, open
+   `open_create_api_key_card` for the project's Live environment. First add an
+   empty placeholder to the env file and keep the file git-ignored; the member
+   pastes the key there, never in this chat. Without cards, share the key page
+   link it returns and wait for the member to say the key is saved.
+7. API upgrades (`inspect_api_upgrade`, `preview_api_upgrade`,
    `prepare_api_upgrade`, `apply_api_upgrade`, `rollback_api_upgrade`) may change
    production only after the member confirms the exact prepared plan and its
    rollback in this conversation.
-7. Call `list_notices` again after setup and before you hand back.
+8. Call `list_notices` again after setup and before you hand back.
 
 ## Member-only steps
 
