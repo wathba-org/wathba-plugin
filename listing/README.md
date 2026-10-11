@@ -38,7 +38,7 @@ rejects any icon that is not a square PNG of 48 to 4096 pixels under 5 MiB.
 **Description (en):** Wathba gives your app Saudi payments, OTP/SMS, identity
 verification (KYC), ZATCA e-invoicing and shipping through one catalog. Connect
 your coding agent and it reads your Wathba projects and notices, recommends
-services for your repository, follows each service's pinned integration guide,
+services for your repository, follows each service's integration docs,
 creates sandbox projects, and updates an integration's API version after you
 confirm the exact plan. You sign in through the browser; the agent never sees
 an API key.
@@ -46,7 +46,7 @@ an API key.
 **Description (ar):** وثبة تمنح تطبيقك المدفوعات والتحقق برمز OTP والتحقق من
 الهوية والفوترة الإلكترونية وفق متطلبات زاتكا والشحن عبر كتالوج واحد. اربط
 وكيلك البرمجي ليقرأ مشاريعك وتنبيهاتك في وثبة، ويقترح الخدمات المناسبة
-لمستودعك، ويتبع دليل التكامل المعتمد لكل خدمة، وينشئ مشاريع اختبارية، ويحدّث
+لمستودعك، ويتبع وثائق التكامل لكل خدمة، وينشئ مشاريع اختبارية، ويحدّث
 إصدار API للتكامل بعد تأكيدك للخطة بدقة. تسجّل الدخول عبر المتصفح، ولا يرى
 الوكيل أي مفتاح API.
 
@@ -65,9 +65,7 @@ the Wathba consent page.
 | `list_projects` | Read | The member's projects and environment readiness |
 | `get_project_setup` | Read | Sandbox, production, portal and key-management guidance (no credentials) |
 | `list_project_services` | Read | Configured and available services |
-| `get_service_integration_docs` | Read | The pinned integration guide for a configured service |
-| `get_service_operations` | Read | The guide's runtime operations only |
-| `get_service_troubleshooting` | Read | The guide's troubleshooting only |
+| `get_service_integration_docs` | Read | A configured service's docs for its API version: runtime, operations, limits and troubleshooting |
 | `recommend_services_for_repository` | Read | Recommendations from a bounded repository profile built locally; no source code is sent |
 | `create_project` | Write | Creates one sandbox project (idempotent) |
 | `inspect_api_upgrade` | Read | Pinned version and supported contracts |
