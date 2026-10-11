@@ -28,8 +28,13 @@ replace the member's confirmation.
 2. To suggest services, build a bounded repository profile locally and call
    `recommend_services_for_repository`. Never send source code, file contents,
    environment values, credentials or git history.
-3. Call `list_project_services`. A service the project lacks is enabled by the
-   member on the portal page the result links to.
+3. Call `list_project_services` and follow each service's `nextAction`. Never
+   offer to enable a service whose action is the portal. When the action names
+   a listed tool, open its card if this host shows cards
+   (`open_enable_authentica_form`, then `open_create_api_key_card`); without
+   cards, call `enable_authentica` only after the member confirms the settings
+   from `get_authentica_enablement`. The member pastes the API key into the env
+   file, never this chat: add an empty placeholder and keep the file git-ignored.
 4. For a configured service, call `get_service_integration_docs` once with the
    `integrationDocs` arguments from `list_project_services`, setting `language`
    to the member's language. Keep the project, environment and service values
@@ -46,10 +51,10 @@ replace the member's confirmation.
 
 ## Member-only steps
 
-Wathba tools read, guide and create sandbox projects. Enabling a service, API
-keys, the wallet, spending limits, provider terms, production and deployment
-stay with the member: give the portal link from the result or notice and say
-what it unblocks.
+Wathba tools read, guide and create sandbox projects. Enabling a portal-only
+service, API keys, the wallet, spending limits, provider terms, production and
+deployment stay with the member: give the portal link from the result or notice
+and say what it unblocks.
 
 ## Language
 

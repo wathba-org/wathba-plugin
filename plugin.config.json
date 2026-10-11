@@ -1,5 +1,5 @@
 {
-  "version": "2.0.5",
+  "version": "2.0.6",
   "rootTarget": "prod",
   "description": "Connect your coding agent to Wathba over MCP: projects, notices, service docs, sandbox project creation and member-confirmed API upgrades for Saudi payments, OTP/SMS, KYC, ZATCA e-invoicing and shipping.",
   "shortDescription": "Saudi payments, OTP and KYC",
@@ -49,7 +49,12 @@
       "recommend_services_for_repository",
       "rollback_api_upgrade"
     ],
-    "nonToolTerms": []
+    "nonToolTerms": [
+      "enable_authentica",
+      "get_authentica_enablement",
+      "open_create_api_key_card",
+      "open_enable_authentica_form"
+    ]
   },
   "claude": {
     "category": "developer-tools"
