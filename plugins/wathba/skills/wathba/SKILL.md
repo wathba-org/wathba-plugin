@@ -22,9 +22,10 @@ replace the member's confirmation.
 
 ## Work
 
-1. Start every Wathba task with `list_notices` (page until the cursors are
-   empty), then `list_projects`. Agree the project and environment with the
-   member and use the exact IDs from the results.
+1. Start every Wathba task with one `list_notices` call (its first page is
+   enough; follow its cursors only when the member asks for every notice), then
+   `list_projects`. Agree the project and environment with the member and use
+   the exact IDs from the results.
 2. To suggest services, build a bounded repository profile locally and call
    `recommend_services_for_repository`. Never send source code, file contents,
    environment values, credentials or git history.
@@ -70,7 +71,12 @@ replace the member's confirmation.
    `prepare_api_upgrade`, `apply_api_upgrade`, `rollback_api_upgrade`) may change
    production only after the member confirms the exact prepared plan and its
    rollback in this conversation.
-8. Call `list_notices` again after setup and before you hand back.
+8. Every Wathba result carries fresh notices for the account and the project it
+   touches; read those instead of calling `list_notices` after each step. Call
+   it again only on a project switch or when the member asks. `noticesStatus`
+   `partial` is normal here and is no reason to call it again. Mention notices
+   about other projects once, in one grouped line, unless one blocks
+   production.
 
 ## Member-only steps
 
