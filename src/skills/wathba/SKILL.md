@@ -35,18 +35,23 @@ replace the member's confirmation.
    a tool (`open_enable_authentica_form`), open that card if this host shows
    cards; without cards, call `enable_authentica` only after the member confirms
    the settings from `get_authentica_enablement` in this chat.
-   Once Authentica is enabled, offer a free live test: open
-   `open_authentica_live_test_card` if this host shows cards, where the member
-   sends and verifies it; otherwise share its portal link. Never send a test
-   yourself.
+   Cards never write to this chat: the member finishes a card and writes to
+   you next. If the card's result did not reach you, check it with a read
+   tool such as `get_authentica_enablement` instead of assuming.
+   Once Authentica is enabled, ask the member whether they want to run a free
+   live test now. If they say yes, open `open_authentica_live_test_card` if
+   this host shows cards: the member enters their own phone number or email
+   there, then verifies the code they receive. Otherwise share its portal
+   link. Never send a test yourself.
 5. For a configured service, call `get_service_integration_docs` once with the
    `integrationDocs` arguments from `list_project_services`, setting `language`
    to the member's language. Keep the project, environment and service values
    exactly. The docs match the service's dated API version and cover its
    operations, limits and troubleshooting. Their examples are plain HTTP; write
    the code in the app's server-side language.
-6. After Authentica is enabled and you have read its docs, open
-   `open_create_api_key_card` for the project's Live environment. First add an
+6. Tested or not, after Authentica is enabled and you have read its docs,
+   always finish with `open_create_api_key_card` for the project's Live
+   environment, so the member creates the Live API key. First add an
    empty placeholder to the env file and keep the file git-ignored; the member
    pastes the key there, never in this chat. Without cards, share the key page
    link it returns and wait for the member to say the key is saved.
