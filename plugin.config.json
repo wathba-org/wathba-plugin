@@ -1,5 +1,5 @@
 {
-  "version": "2.0.12",
+  "version": "2.0.13",
   "rootTarget": "prod",
   "description": "Connect your coding agent to Wathba over MCP: projects, notices, service docs, sandbox project creation and member-confirmed API upgrades for Saudi payments, OTP/SMS, KYC, ZATCA e-invoicing and shipping.",
   "shortDescription": "Saudi payments, OTP and KYC",
@@ -50,15 +50,23 @@
       "rollback_api_upgrade"
     ],
     "nonToolTerms": [
+      "confirm_domain_purchase",
       "enable_authentica",
       "enable_wathba_pay",
+      "find_domains",
       "get_authentica_enablement",
+      "get_domain_purchase",
       "get_wathba_pay_enablement",
       "open_authentica_live_test_card",
       "open_create_api_key_card",
+      "open_domain_purchase_card",
+      "open_domain_search_card",
       "open_enable_authentica_form",
       "open_enable_wathba_pay_form",
+      "prepare_domain_purchase",
+      "quote_domain",
       "send_authentica_free_test",
+      "send_domain_purchase_code",
       "verify_authentica_live_test"
     ]
   },
