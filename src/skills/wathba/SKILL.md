@@ -62,12 +62,16 @@ replace the member's confirmation.
    repository, offer to fix the listed items, then ask the member to press
    Check again in the card. Moyasar's documents, signing and turning payments
    on happen later in the portal: give the member the link.
-5. For a configured service, call `get_service_integration_docs` once with the
-   `integrationDocs` arguments from `list_project_services`, setting `language`
-   to the member's language. Keep the project, environment and service values
-   exactly. The docs match the service's dated API version and cover its
+5. For each service the app needs, call `get_service_integration_docs` once
+   with the `integrationDocs` arguments from `list_project_services` (configured
+   and available services both carry them), setting `language` to the member's
+   language. Keep the project, environment and service values exactly. Docs
+   never wait for setup: before a project exists, call it with only
+   `serviceCode`. The docs match the service's dated API version and cover its
    operations, limits and troubleshooting. Their examples are plain HTTP; write
-   the code in the app's server-side language.
+   the code in the app's server-side language. When `readiness` is null the
+   service is not enabled yet: write the integration anyway, then tell the
+   member which services to enable.
 6. Once the member has finished or declined the live test and you have read
    the docs, always finish with `open_create_api_key_card` for the project's
    Live environment, so the member creates the Live API key. It is the
