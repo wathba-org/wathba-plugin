@@ -33,15 +33,17 @@ replace the member's confirmation.
    On a retry, reuse the same `idempotencyKey`.
 4. Call `list_project_services` and follow each service's `nextAction`. Never
    offer to enable a service whose action is the portal. When the action names
-   a tool (`open_enable_authentica_form`), open that card if this host shows
-   cards; without cards, call `enable_authentica` only after the member confirms
-   the settings from `get_authentica_enablement` in this chat.
+   a tool (`open_enable_authentica_form`, `open_enable_wathba_pay_form`), open
+   that card if this host shows cards; without cards, call `enable_authentica`
+   only after the member confirms the settings from `get_authentica_enablement`
+   in this chat, and give the Wathba Pay portal link the tool returns.
    One step at a time: open at most one card per turn, never in the same
    turn as a question, and after a card or a question end your turn and wait
    for the member.
    Cards never write to this chat: the member finishes a card and writes to
    you next. If the card's result did not reach you, check it with a read
-   tool such as `get_authentica_enablement` instead of assuming.
+   tool such as `get_authentica_enablement` or `get_wathba_pay_enablement`
+   instead of assuming.
    Authentica app names are unique across all apps: suggest the project's own
    name first, never a name another of the member's projects uses.
    Once Authentica is enabled, ask the member, as that turn's only step,
@@ -51,6 +53,15 @@ replace the member's confirmation.
    receive. Otherwise share its portal link. Never send a test yourself. A
    number that just got a code cannot get another until that code expires, so
    test the app's login with another number or after a short wait.
+   Wathba Pay (card payments through Moyasar) is applied for in its card: the
+   member picks a verified business identity, enters the checkout name,
+   statement descriptor and website, accepts the terms and presses Start.
+   Wathba checks the website and submits to Moyasar when it passes; never call
+   `enable_wathba_pay` yourself. Pass `website` when you know the app's public
+   address. If the check finds problems and the website's code is in this
+   repository, offer to fix the listed items, then ask the member to press
+   Check again in the card. Moyasar's documents, signing and turning payments
+   on happen later in the portal: give the member the link.
 5. For a configured service, call `get_service_integration_docs` once with the
    `integrationDocs` arguments from `list_project_services`, setting `language`
    to the member's language. Keep the project, environment and service values
