@@ -33,7 +33,8 @@ replace the member's confirmation.
    On a retry, reuse the same `idempotencyKey`.
 4. Call `list_project_services` and follow each service's `nextAction`. Never
    offer to enable a service whose action is the portal. When the action names
-   a tool (`open_enable_authentica_form`, `open_enable_wathba_pay_form`), open
+   a tool (`open_enable_authentica_form`, `open_enable_wathba_pay_form`,
+   `open_domain_search_card`), open
    that card if this host shows cards; without cards, call `enable_authentica`
    only after the member confirms the settings from `get_authentica_enablement`
    in this chat, and give the Wathba Pay portal link the tool returns.
@@ -62,6 +63,14 @@ replace the member's confirmation.
    repository, offer to fix the listed items, then ask the member to press
    Check again in the card. Moyasar's documents, signing and turning payments
    on happen later in the portal: give the member the link.
+   To find and buy a .sa domain, open `open_domain_search_card`: the member
+   picks an identity and a name built from their own name, and the card tells
+   you the chosen domain, its price and whether the wallet covers it. If it
+   doesn't, ask the member to top up their wallet (the card links it) and wait;
+   otherwise open `open_domain_purchase_card` with the same project, identity
+   and domain. The member confirms the payment there with a code Wathba emails
+   them; never ask for, read or type that code. Check the outcome with
+   `get_domain_purchase`.
 5. For each service the app needs, call `get_service_integration_docs` once
    with the `integrationDocs` arguments from `list_project_services` (configured
    and available services both carry them), setting `language` to the member's
