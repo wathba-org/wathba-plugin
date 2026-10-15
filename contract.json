@@ -4,7 +4,7 @@
   "marketplace": "wathba",
   "plugin": "wathba",
   "serverKey": "wathba",
-  "mcpEndpoint": "https://api.wathba.info/mcp",
+  "mcpEndpoint": "https://api.wathba.sa/mcp",
   "tools": [
     "apply_api_upgrade",
     "create_project",

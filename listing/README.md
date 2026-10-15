@@ -8,7 +8,7 @@ in this repository.
 |---|---|---|
 | Official MCP Registry | `server.json`, published by `release.yml` on each `v*` tag | Automated |
 | Anthropic plugin directory (Claude Code) | This repository (`wathba@wathba` from the `wathba` marketplace) | Ready once the blockers below are cleared |
-| Anthropic Connectors Directory (Claude web, Desktop, Cowork) | Remote MCP URL `https://api.wathba.info/mcp` | Ready once the blockers below are cleared |
+| Anthropic Connectors Directory (Claude web, Desktop, Cowork) | Remote MCP URL `https://api.wathba.sa/mcp` | Ready once the blockers below are cleared |
 | OpenAI plugin directory (ChatGPT and Codex) | The `wathba-plugin-<version>.zip` attached to the GitHub release | Ready once the blockers below are cleared |
 
 ## Blockers before any directory submission
