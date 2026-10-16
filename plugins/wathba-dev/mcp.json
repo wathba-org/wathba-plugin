@@ -3,7 +3,7 @@
   "mcpServers": {
     "wathba-dev": {
       "type": "streamable-http",
-      "url": "https://apidev.wathba.info/mcp"
+      "url": "https://apidev.wathba.sa/mcp"
     }
   }
 }
