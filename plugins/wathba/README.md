@@ -4,8 +4,8 @@ Connects Codex, Claude Code and other Agent Plugins clients to Wathba
 over MCP. The member signs in through the browser (OAuth); no API key or token
 ever goes through the chat.
 
-- MCP server: https://api.wathba.info/mcp
-- Guide: https://platform.wathba.info/docs/mcp
+- MCP server: https://api.wathba.sa/mcp
+- Guide: https://platform.wathba.sa/docs/mcp
 
 ## Claude Code
 
@@ -31,5 +31,5 @@ updates when it starts.
 
 ## One connection
 
-Use either this plugin or a direct MCP connection to https://api.wathba.info/mcp, not both,
+Use either this plugin or a direct MCP connection to https://api.wathba.sa/mcp, not both,
 or every Wathba tool appears twice.

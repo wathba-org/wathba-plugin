@@ -2,7 +2,7 @@
   "mcpServers": {
     "wathba": {
       "type": "http",
-      "url": "https://api.wathba.info/mcp"
+      "url": "https://api.wathba.sa/mcp"
     }
   }
 }

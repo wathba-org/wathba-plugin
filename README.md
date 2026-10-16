@@ -9,8 +9,8 @@ sign in through the browser (OAuth).
 
 | Environment | Branch | Install id | MCP server |
 |---|---|---|---|
-| Production | `main` | `wathba@wathba` | `https://api.wathba.info/mcp` |
-| Development | `dev` | `wathba-dev@wathba-development` | `https://apidev.wathba.info/mcp` |
+| Production | `main` | `wathba@wathba` | `https://api.wathba.sa/mcp` |
+| Development | `dev` | `wathba-dev@wathba-development` | `https://apidev.wathba.sa/mcp` |
 
 ## Install
 

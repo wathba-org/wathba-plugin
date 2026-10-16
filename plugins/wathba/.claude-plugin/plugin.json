@@ -1,14 +1,14 @@
 {
   "name": "wathba",
   "displayName": "Wathba",
-  "version": "2.0.14",
+  "version": "2.0.15",
   "description": "Connect your coding agent to Wathba over MCP: projects, notices, service docs, sandbox project creation and member-confirmed API upgrades for Saudi payments, OTP/SMS, KYC, ZATCA e-invoicing and shipping.",
   "author": {
     "name": "Wathba",
     "email": "juriba@wathba.sa",
     "url": "https://wathba.sa"
   },
-  "homepage": "https://platform.wathba.info/docs/mcp",
+  "homepage": "https://platform.wathba.sa/docs/mcp",
   "repository": "https://github.com/wathba-org/wathba-plugin",
   "license": "Apache-2.0",
   "keywords": [
