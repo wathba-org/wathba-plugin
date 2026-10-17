@@ -73,7 +73,10 @@ replace the member's confirmation.
    otherwise open `open_domain_purchase_card` with the same project, identity
    and domain. The member confirms the payment there with a code Wathba emails
    them; never ask for, read or type that code. Check the outcome with
-   `get_domain_purchase`.
+   `get_domain_purchase`. Cards show where things stand each time they open,
+   and Wathba never buys one domain name twice: for a domain already
+   submitted or registered, tell the member instead of opening another
+   purchase card.
 5. For each service the app needs, call `get_service_integration_docs` once
    with the `integrationDocs` arguments from `list_project_services` (configured
    and available services both carry them), setting `language` to `ar` for an
