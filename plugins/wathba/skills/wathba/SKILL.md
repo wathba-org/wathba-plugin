@@ -76,8 +76,8 @@ replace the member's confirmation.
    `get_domain_purchase`.
 5. For each service the app needs, call `get_service_integration_docs` once
    with the `integrationDocs` arguments from `list_project_services` (configured
-   and available services both carry them), setting `language` to the member's
-   language. Keep the project, environment and service values exactly. Docs
+   and available services both carry them), setting `language` to `ar` for an
+   Arabic-speaking member and `en` otherwise. Keep the project, environment and service values exactly. Docs
    never wait for setup: before a project exists, call it with only
    `serviceCode`. The docs match the service's dated API version and cover its
    operations, limits and troubleshooting. Their examples are plain HTTP; write
@@ -114,5 +114,9 @@ and say what it unblocks.
 
 ## Language
 
-Reply in the member's language (Arabic or English). Keep codes, IDs, tool names
-and links exactly as returned.
+Talk to the member in the language they write in, whatever it is, and never
+ask them to switch to English. Wathba's results, docs and notices are English
+(Arabic when a `language` or `locale` input is `ar`): translate explanations,
+questions and notices for the member, and keep codes, IDs, tool names and
+links exactly as returned. Inputs named `language` or `locale` take `ar` or
+`en`: pass `ar` for an Arabic-speaking member and `en` otherwise.
