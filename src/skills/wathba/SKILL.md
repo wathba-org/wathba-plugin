@@ -34,10 +34,13 @@ replace the member's confirmation.
 4. Call `list_project_services` and follow each service's `nextAction`. Never
    offer to enable a service whose action is the portal. When the action names
    a tool (`open_enable_authentica_form`, `open_enable_wathba_pay_form`,
-   `open_domain_search_card`), open
-   that card if this host shows cards; without cards, call `enable_authentica`
-   only after the member confirms the settings from `get_authentica_enablement`
-   in this chat, and give the Wathba Pay portal link the tool returns.
+   `open_domain_search_card`), call it. Its outcome says whether a card is
+   shown: `use_chat` means this host shows no card, so ask in this chat and
+   call the tool its description names once the member confirms (for
+   Authentica, suggest names and ask for the channel and code validity from
+   `get_authentica_enablement`, then call `enable_authentica`); `use_portal`
+   means give the member the link it returns. Never say a card opened when
+   the outcome says it did not.
    One step at a time: open at most one card per turn, never in the same
    turn as a question, and after a card or a question end your turn and wait
    for the member.
@@ -49,9 +52,9 @@ replace the member's confirmation.
    name first, never a name another of the member's projects uses.
    Once Authentica is enabled, ask the member, as that turn's only step,
    whether they want to run a free live test now. If they say yes, open
-   `open_authentica_live_test_card` if this host shows cards: the member
-   enters their own phone number or email there, then verifies the code they
-   receive. Otherwise share its portal link. Never send a test yourself. A
+   `open_authentica_live_test_card`: the member enters their own phone number
+   or email there, then verifies the code they receive. When its outcome is
+   `use_portal`, share its portal link. Never send a test yourself. A
    number that just got a code cannot get another until that code expires, so
    test the app's login with another number or after a short wait.
    Wathba Pay (card payments through Moyasar) is applied for in its card: the
@@ -73,8 +76,8 @@ replace the member's confirmation.
    `get_domain_purchase`.
 5. For each service the app needs, call `get_service_integration_docs` once
    with the `integrationDocs` arguments from `list_project_services` (configured
-   and available services both carry them), setting `language` to the member's
-   language. Keep the project, environment and service values exactly. Docs
+   and available services both carry them), setting `language` to `ar` for an
+   Arabic-speaking member and `en` otherwise. Keep the project, environment and service values exactly. Docs
    never wait for setup: before a project exists, call it with only
    `serviceCode`. The docs match the service's dated API version and cover its
    operations, limits and troubleshooting. Their examples are plain HTTP; write
@@ -89,8 +92,8 @@ replace the member's confirmation.
    empty `WATHBA_API_KEY=` line to the env file (or reuse the one there) and
    keep the file git-ignored; the member pastes the key there, never in this
    chat. The key page sets the key's access; never ask the member to choose
-   scopes. Without cards, share the key page link it returns and wait for the
-   member to say the key is saved.
+   scopes. When its outcome is `use_portal`, share the key page link it
+   returns and wait for the member to say the key is saved.
 7. API upgrades (`inspect_api_upgrade`, `preview_api_upgrade`,
    `prepare_api_upgrade`, `apply_api_upgrade`, `rollback_api_upgrade`) may change
    production only after the member confirms the exact prepared plan and its
@@ -111,5 +114,9 @@ and say what it unblocks.
 
 ## Language
 
-Reply in the member's language (Arabic or English). Keep codes, IDs, tool names
-and links exactly as returned.
+Talk to the member in the language they write in, whatever it is, and never
+ask them to switch to English. Wathba's results, docs and notices are English
+(Arabic when a `language` or `locale` input is `ar`): translate explanations,
+questions and notices for the member, and keep codes, IDs, tool names and
+links exactly as returned. Inputs named `language` or `locale` take `ar` or
+`en`: pass `ar` for an Arabic-speaking member and `en` otherwise.
