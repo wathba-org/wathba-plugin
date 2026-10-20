@@ -48,24 +48,37 @@ replace the member's confirmation.
    you next. If the card's result did not reach you, check it with a read
    tool such as `get_authentica_enablement` or `get_wathba_pay_enablement`
    instead of assuming.
+   In a sandbox environment Authentica and Wathba Pay are free simulations:
+   nothing reaches the provider, nothing is charged, and the app tests with
+   the fixed test values in the service's docs. Pass the sandbox
+   `environmentId` to `open_enable_authentica_form` or
+   `open_enable_wathba_pay_form` and the member turns the simulation on in
+   the card. In a host without cards, Authentica's `enable_authentica` with
+   that `environmentId` turns it on in one call once the member confirms;
+   Wathba Pay gives the portal link. Without `environmentId` these cards set
+   up Live, which is for going live.
    Authentica app names are unique across all apps: suggest the project's own
    name first, never a name another of the member's projects uses.
-   Once Authentica is enabled, ask the member, as that turn's only step,
-   whether they want to run a free live test now. If they say yes, open
+   Once Authentica is enabled in Live, ask the member, as that turn's only
+   step, whether they want to run a free live test now. If they say yes, open
    `open_authentica_live_test_card`: the member enters their own phone number
    or email there, then verifies the code they receive. When its outcome is
    `use_portal`, share its portal link. Never send a test yourself. A
    number that just got a code cannot get another until that code expires, so
    test the app's login with another number or after a short wait.
-   Wathba Pay (card payments through Moyasar) is applied for in its card: the
-   member picks a verified business identity, enters the checkout name,
-   statement descriptor and website, accepts the terms and presses Start.
+   To go live, Wathba Pay (card payments through Moyasar) is applied for in
+   its card without `environmentId`: the member picks a verified business
+   identity, enters the checkout name, statement descriptor and website,
+   accepts the terms and presses Start.
    Wathba checks the website and submits to Moyasar when it passes; never call
    `enable_wathba_pay` yourself. Pass `website` when you know the app's public
    address. If the check finds problems and the website's code is in this
    repository, offer to fix the listed items, then ask the member to press
    Check again in the card. Moyasar's documents, signing and turning payments
-   on happen later in the portal: give the member the link.
+   on happen later in the portal: give the member the link. A project with
+   the payments simulation on is refused a real application, and one with an
+   application under way can't turn the simulation on: the member turns the
+   simulation off in the portal before applying.
    To find and buy a .sa domain, open `open_domain_search_card`: the member
    picks an identity and a name built from their own name, and the card tells
    you the chosen domain, its price and whether the wallet covers it. If it
@@ -84,19 +97,26 @@ replace the member's confirmation.
    never wait for setup: before a project exists, call it with only
    `serviceCode`. The docs match the service's dated API version and cover its
    operations, limits and troubleshooting. Their examples are plain HTTP; write
-   the code in the app's server-side language. When `readiness` is null the
-   service is not enabled yet: write the integration anyway, then tell the
-   member which services to enable.
-6. Once the member has finished or declined the live test and you have read
-   the docs, always finish with `open_create_api_key_card` for the project's
-   Live environment, so the member creates the Live API key. It is the
-   project's key for that environment and serves every service, so the app
-   reads it from `WATHBA_API_KEY`, never a service-specific name. First add an
+   the code in the app's server-side language. For a sandbox, the docs'
+   `sandbox-test-values` article lists the values that succeed and fail. When
+   `readiness` is null the service is not enabled yet: write the integration
+   anyway, then tell the member which services to enable.
+6. Build and test in the sandbox first. Once you have read the docs (and, in
+   Live, the member has finished or declined the live test), finish with
+   `open_create_api_key_card` for the environment the app runs against: the
+   sandbox while it tests, Live when it goes live. The key is the project's
+   key for that environment and serves every service, so the app reads it
+   from `WATHBA_API_KEY`, never a service-specific name. First add an
    empty `WATHBA_API_KEY=` line to the env file (or reuse the one there) and
    keep the file git-ignored; the member pastes the key there, never in this
    chat. The key page sets the key's access; never ask the member to choose
    scopes. When its outcome is `use_portal`, share the key page link it
    returns and wait for the member to say the key is saved.
+   Going live means enabling each service in production (Authentica's Live
+   setup, the Wathba Pay application) and swapping `WATHBA_API_KEY` for the
+   Live key. On member API 2026-10-18 or later (`/v1/ex` paths) the app's
+   code and paths stay the same; if a Live binding is pinned to an older
+   version, run `inspect_api_upgrade` before going live.
 7. API upgrades (`inspect_api_upgrade`, `preview_api_upgrade`,
    `prepare_api_upgrade`, `apply_api_upgrade`, `rollback_api_upgrade`) may change
    production only after the member confirms the exact prepared plan and its
