@@ -73,8 +73,11 @@ replace the member's confirmation.
    Wathba checks the website and submits to Moyasar when it passes; never call
    `enable_wathba_pay` yourself. Pass `website` when you know the app's public
    address. If the check finds problems and the website's code is in this
-   repository, offer to fix the listed items, then ask the member to press
-   Check again in the card. Moyasar's documents, signing and turning payments
+   repository, fix the listed items and get the change deployed, then call
+   `check_wathba_pay_website` and poll `get_wathba_pay_enablement` until the
+   check finishes; repeat until it passes. Then ask the member to open the
+   card and submit: only the member submits, since they accept the terms
+   there. Moyasar's documents, signing and turning payments
    on happen later in the portal: give the member the link. The application
    and the payments simulation are independent: the member can apply while
    the sandbox keeps simulating, during Moyasar's review and after.
