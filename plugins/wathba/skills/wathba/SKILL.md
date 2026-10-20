@@ -75,10 +75,9 @@ replace the member's confirmation.
    address. If the check finds problems and the website's code is in this
    repository, offer to fix the listed items, then ask the member to press
    Check again in the card. Moyasar's documents, signing and turning payments
-   on happen later in the portal: give the member the link. A project with
-   the payments simulation on is refused a real application, and one with an
-   application under way can't turn the simulation on: the member turns the
-   simulation off in the portal before applying.
+   on happen later in the portal: give the member the link. The application
+   and the payments simulation are independent: the member can apply while
+   the sandbox keeps simulating, during Moyasar's review and after.
    To find and buy a .sa domain, open `open_domain_search_card`: the member
    picks an identity and a name built from their own name, and the card tells
    you the chosen domain, its price and whether the wallet covers it. If it
