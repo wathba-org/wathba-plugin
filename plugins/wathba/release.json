@@ -3,9 +3,9 @@
   "target": "prod",
   "marketplace": "wathba",
   "plugin": "wathba",
-  "version": "2.0.18",
+  "version": "2.0.19",
   "mcpEndpoint": "https://api.wathba.sa/mcp",
   "portalOrigin": "https://platform.wathba.sa",
   "credentialMode": "oauth_pkce",
-  "contentDigest": "sha256:a8aae4e7f2748e25a1e7979760956f82731a980775f8b2263681d316b12a3e67"
+  "contentDigest": "sha256:e8bcd3ea1df40278899cd98f104716c89c982e175429061898a8055213846e65"
 }
