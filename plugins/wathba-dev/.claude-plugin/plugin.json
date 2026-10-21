@@ -1,7 +1,7 @@
 {
   "name": "wathba-dev",
   "displayName": "Wathba Dev",
-  "version": "2.0.18-dev.22",
+  "version": "2.0.19-dev.23",
   "description": "Connect your coding agent to the Wathba development environment over MCP: projects, notices, service docs, sandbox project creation and member-confirmed API upgrades for Saudi payments, OTP/SMS, KYC, ZATCA e-invoicing and shipping.",
   "author": {
     "name": "Wathba",
