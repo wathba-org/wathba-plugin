@@ -141,23 +141,28 @@ and say what it unblocks.
 
 If Wathba lists `report_issue`, you can report a Wathba problem you can't get
 past: the same Wathba call still fails after you followed its guidance and
-retried once, a call returns an internal error, or the docs contradict what
-Wathba does. A bug in the app's own code, a step the member can take, or a
-problem a notice already explains is not one.
+retried once, a call returns an internal error, a charge looks wrong, or the
+docs contradict what Wathba does. A bug in the app's own code, a step the
+member can take, or a problem a notice already explains is not one.
 
-1. Tell the member what is blocked and show the report you would send: a
-   one-line title, what you were doing, what you expected, what happened, and
-   each failed call's tool, code and `correlationId` exactly as returned.
-2. Ask, as that turn's only question, whether to send it to Wathba's team,
-   then end your turn and wait.
+1. Fill the report from the conversation: a one-line title, the task (from
+   the tool's list), the type, whether it blocks the member, whether money was
+   affected, how often it happens, what you were doing, what you expected,
+   what happened, and any workaround you found. Wathba adds the calls it saw
+   fail, the project's environment and the agent app itself.
+2. Show the member the report and ask, as that turn's only question, whether
+   to send it to Wathba's team and whether the team may contact them about it;
+   ask about anything you couldn't tell in the same question. Then end your
+   turn and wait.
 3. Only after they say yes, call `report_issue` with `memberConfirmed` set to
-   true and a new `idempotencyKey` (reuse it only to retry that report), then
-   give the member the `reportId`.
+   true, `okToContact` set to their answer and a new `idempotencyKey` (reuse
+   it only to retry that report), then give the member the `reportId`.
 
-Never put credentials, API keys, source code, file contents, environment values
-or personal data in a report. Report each problem once. If the member says no,
-or `report_issue` isn't listed, send nothing: tell the member what failed and
-the correlation IDs, and carry on with what you can do.
+Never put credentials, API keys, passwords or source code in a report, and
+include personal data only when the problem needs it. Attach a request or
+response snippet only when it shows the problem. Report each problem once. If
+the member says no, or `report_issue` isn't listed, send nothing: tell the
+member what failed and the correlation IDs, and carry on with what you can do.
 
 ## Language
 
