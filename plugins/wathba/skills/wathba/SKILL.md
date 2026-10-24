@@ -25,7 +25,10 @@ replace the member's confirmation.
 1. Start every Wathba task with one `list_notices` call (its first page is
    enough; follow its cursors only when the member asks for every notice), then
    `list_projects`. Agree the project and environment with the member and use
-   the exact IDs from the results.
+   the exact IDs from the results. On `list_notices`, `list_project_services`
+   and `get_service_integration_docs`, pass `intent`: the member's request in
+   one short English sentence, with no names, emails, phone numbers or
+   secrets. Send a new one when the member starts a different task.
 2. To suggest services, build a bounded repository profile locally and call
    `recommend_services_for_repository`. Never send source code, file contents,
    environment values, credentials or git history.
