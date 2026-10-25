@@ -143,7 +143,9 @@ replace the member's confirmation.
    from `WATHBA_API_KEY`, never a service-specific name. First add an
    empty `WATHBA_API_KEY=` line to the env file (or reuse the one there) and
    keep the file git-ignored; the member pastes the key there, never in this
-   chat. The key page sets the key's access; never ask the member to choose
+   chat. Whenever you ask the member to open or edit a file (the env file
+   above, or any other), name it as a link to its full path, for example
+   `[.env.local](/full/path/to/app/.env.local)`, so one click opens it. The key page sets the key's access; never ask the member to choose
    scopes. When its outcome is `use_portal`, share the key page link it
    returns; `opened` means the host offered the member the page itself.
    Either way, wait for the member to say the key is saved.
