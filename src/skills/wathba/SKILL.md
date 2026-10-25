@@ -110,9 +110,11 @@ replace the member's confirmation.
    For an Authentica OTP screen, build one send action, then the code field,
    then Resend after about 60 seconds and not before the send's
    `result.expiresAt`. A send answers 200 (sent), 422 or 503 at once, so
-   never add a status-check button or polling. A rare 202 is the app
-   server's job: it retries the identical request with the same
-   Idempotency-Key.
+   never add a status-check button or polling. A rare 202 stays on the
+   app's server: for operation_dispatch_pending it retries the identical
+   request with the same Idempotency-Key; for
+   operation_pending_reconciliation it stops retrying, tells the user the
+   code could not be confirmed and sends that recipient no new code.
 6. Build and test in the sandbox first. Once you have read the docs (and, in
    Live, the member has finished or declined the live test), finish with
    `open_create_api_key_card` for the environment the app runs against: the
