@@ -298,9 +298,8 @@ function buildFiles(config, sources, targetName, version) {
             category: config.codex.category,
             capabilities: config.codex.capabilities,
             websiteURL: docsUrl,
-            privacyPolicyURL: config.publisher.privacyPolicyURL,
-            // Omitted from the JSON until the config sets it.
-            termsOfServiceURL: config.publisher.termsOfServiceURL,
+            privacyPolicyURL: `${target.portalOrigin}/legal/privacy`,
+            termsOfServiceURL: `${target.portalOrigin}/legal/terms`,
             brandColor: config.branding.brandColor,
             composerIcon: `./assets/wathba-icon-${composerIconThemeFor(config, targetName)}.png`,
             composerIconDark: "./assets/wathba-icon-dark.png",

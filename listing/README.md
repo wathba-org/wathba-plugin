@@ -13,13 +13,18 @@ in this repository.
 
 ## Blockers before any directory submission
 
-1. Public privacy policy and terms of service pages for the plugin. Add their
-   URLs to `plugin.config.json` as `publisher.privacyPolicyURL` and
-   `publisher.termsOfServiceURL` (both omitted until set) and to each form. The
-   support contact, juriba@wathba.sa, is already in the generated metadata.
-2. A dedicated reviewer member account with a sandbox project, shared only
+1. A dedicated reviewer member account with a sandbox project, shared only
    through each directory's form.
-3. Recorded acceptance runs for the hosts being listed (`docs/acceptance/`).
+2. Recorded acceptance runs for the hosts being listed (`docs/acceptance/`).
+
+## Legal pages
+
+Enter these in each form. `scripts/sync.mjs` puts each environment's own
+portal pages in the Codex manifest. The support contact, juriba@wathba.sa, is in
+the generated metadata.
+
+- Privacy policy: https://platform.wathba.sa/legal/privacy
+- Terms of service: https://platform.wathba.sa/legal/terms
 
 ## Icons
 
