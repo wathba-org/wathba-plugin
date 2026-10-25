@@ -168,9 +168,14 @@ replace the member's confirmation.
 ## Member-only steps
 
 Wathba tools read, guide and create sandbox projects. Enabling a portal-only
-service, API keys, the wallet, spending limits, provider terms, production and
-deployment stay with the member: give the portal link from the result or notice
-and say what it unblocks.
+service, API keys, funding the wallet, spending limits, provider terms,
+production and deployment stay with the member: give the portal link from the
+result or notice and say what it unblocks.
+
+When the member asks for their wallet balance, read it only as `list_projects`
+describes. If its description offers no wallet read, give the wallet link. If
+the read answers `authorization_required`, ask the member to reconnect Wathba
+in the host. A balance is read-only and never permission to spend.
 
 ## When you're stuck
 

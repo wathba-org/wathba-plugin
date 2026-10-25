@@ -67,7 +67,7 @@ the member approves it on the Wathba consent page.
 | Tool | Reads or writes | Effect |
 |---|---|---|
 | `list_notices` | Read | The member's actionable notices across projects |
-| `list_projects` | Read | The member's projects and environment readiness |
+| `list_projects` | Read | The member's projects and environment readiness; where the member allowed it, their own wallet balance (read-only) |
 | `get_project_setup` | Read | Sandbox, production, portal and key-management guidance (no credentials) |
 | `list_project_services` | Read | Configured and available services |
 | `get_service_integration_docs` | Read | A configured service's docs for its API version: runtime, operations, limits and troubleshooting |
@@ -86,9 +86,10 @@ the member approves it on the Wathba consent page.
 | `open_domain_search_card` / `open_domain_purchase_card` / `confirm_domain_purchase` | Card / Card / Write | Searches and buys a .sa domain; purchase needs the code emailed to the member and is charged to the wallet |
 
 Card tools act only on what the member confirms inside a Wathba card; API keys
-are shown to the member, never returned to the model. The tools never fund or
-read the wallet balance, accept provider terms, deploy, or run payment or
-shipping operations for the member's app.
+are shown to the member, never returned to the model. The tools never fund the
+wallet, accept provider terms, deploy, or run payment or shipping operations
+for the member's app. Where the member allowed it on the consent page,
+`list_projects` can show them their own wallet balance, read-only.
 
 ## Data handling
 
