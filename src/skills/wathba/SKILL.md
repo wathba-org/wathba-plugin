@@ -107,17 +107,21 @@ replace the member's confirmation.
    `sandbox-test-values` article lists the values that succeed and fail. When
    `readiness` is null the service is not enabled yet: write the integration
    anyway, then tell the member which services to enable.
-   For an Authentica OTP screen, build one send action, then the code field,
-   then Resend after 60 seconds, at most 3 times in 10 minutes. Each resend
-   is a new paid send whose code replaces the old one, so verify with the
-   latest send's id. A send answers 200 (sent), 422 or 503 at once, so
-   never add a status-check button or polling. A rare 202 stays on the
+   For an Authentica OTP screen, build one send action. A send answers 200
+   (sent), 422 or 503 at once: on 200 show the code field; on 422 or 503
+   with authentica_send_not_accepted say the code was not sent. Offer Resend
+   after 60 seconds, at most 3 times in 10 minutes and not while a
+   verification is running; each resend is a new paid send with a new
+   Idempotency-Key. Verify with the latest send that answered 200: an
+   accepted resend replaces the old code, a refused one leaves it working.
+   Never add a status-check button or polling. A rare 202 stays on the
    app's server: for operation_dispatch_pending, authentica_release_pending
    or authentica_settlement_pending it retries the identical request with
    the same Idempotency-Key a few seconds later; for
-   operation_pending_reconciliation it stops retrying and tells the user
-   the code could not be confirmed; Wathba refuses a new code to that
-   recipient until the code validity plus about 90 seconds have passed.
+   operation_pending_reconciliation it stops retrying, tells the user the
+   code could not be confirmed and hides the code field (no earlier code
+   verifies either); in Live, Wathba refuses a new code to that recipient
+   until the code validity plus about 90 seconds have passed.
 6. Build and test in the sandbox first. Once you have read the docs (and, in
    Live, the member has finished or declined the live test), finish with
    `open_create_api_key_card` for the environment the app runs against: the
