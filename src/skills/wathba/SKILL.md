@@ -115,8 +115,9 @@ replace the member's confirmation.
    app's server: for operation_dispatch_pending, authentica_release_pending
    or authentica_settlement_pending it retries the identical request with
    the same Idempotency-Key a few seconds later; for
-   operation_pending_reconciliation it stops retrying, tells the user the
-   code could not be confirmed and sends that recipient no new code.
+   operation_pending_reconciliation it stops retrying and tells the user
+   the code could not be confirmed; Wathba refuses a new code to that
+   recipient until the code validity plus about 90 seconds have passed.
 6. Build and test in the sandbox first. Once you have read the docs (and, in
    Live, the member has finished or declined the live test), finish with
    `open_create_api_key_card` for the environment the app runs against: the
