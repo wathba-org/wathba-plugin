@@ -17,8 +17,11 @@ replace the member's confirmation.
 - The app signs the member in through the browser (OAuth). If the Wathba tools
   are missing, or a call reports an authorization problem, ask the member to
   reconnect or sign in to Wathba in this app.
-- Never ask for, accept or print an API key, token, password or code, and never
-  put credentials in chat, files or logs.
+- Never ask for, accept or print an API key, token or password, and never put
+  credentials in chat, files or logs. A one-time code Wathba sends the member
+  (a live test, a domain purchase, accepting the Wathba Pay terms) is the only
+  exception: when a tool asks for it in this chat, pass the member's code to
+  that tool exactly, never guess one, and repeat it nowhere.
 
 ## Work
 
@@ -38,16 +41,26 @@ replace the member's confirmation.
 4. Call `list_project_services` and follow each service's `nextAction`. Never
    offer to enable a service whose action is the portal. When the action names
    a tool (`open_enable_authentica_form`, `open_enable_wathba_pay_form`,
-   `open_domain_search_card`), call it. Its outcome says whether a card is
-   shown: `use_chat` means this host shows no card, so ask in this chat and
-   call the tool its description names once the member confirms (for
-   Authentica, suggest names and ask for the channel and code validity from
-   `get_authentica_enablement`, then call `enable_authentica`); `use_portal`
-   means give the member the link it returns. Never say a card opened when
-   the outcome says it did not.
+   `open_domain_search_card`), call it. These tools work in every host; the
+   outcome says how:
+   - In a host that shows cards the member uses the card. Never call a card's
+     own commands yourself.
+   - In a host that shows forms (such as Claude Code), the member answers in
+     the host's own form and the tool returns the result, or `declined` when
+     they closed it. Don't ask the same questions in this chat.
+   - Otherwise the outcome is `use_chat`: nothing was shown. Ask the member in
+     this chat, one step at a time, then call the same tool again with their
+     answers, as its description says, and only after their explicit yes.
+     `use_portal` means give the member the link it returns.
+   Never say a card or form opened when the outcome says it did not. When a
+   result has `continueWith` and its phase is still in progress (Authentica
+   preparing, prepared, creating or checking; Wathba Pay checking), call the
+   same tool again with its `idempotencyKey` and `confirmation`, at the pace
+   the tool's description gives, until the phase settles.
    One step at a time: open at most one card per turn, never in the same
-   turn as a question, and after a card or a question end your turn and wait
-   for the member.
+   turn as a question, and after a card or a question in this chat end your
+   turn and wait for the member. A form's result already carries the
+   member's answer: continue from it.
    Cards never write to this chat: the member finishes a card and writes to
    you next. If the card's result did not reach you, check it with a read
    tool such as `get_authentica_enablement` or `get_wathba_pay_enablement`
@@ -56,46 +69,46 @@ replace the member's confirmation.
    nothing reaches the provider, nothing is charged, and the app tests with
    the fixed test values in the service's docs. Pass the sandbox
    `environmentId` to `open_enable_authentica_form` or
-   `open_enable_wathba_pay_form` and the member turns the simulation on in
-   the card. In a host without cards, Authentica's `enable_authentica` with
-   that `environmentId` turns it on in one call once the member confirms;
-   Wathba Pay gives the portal link. Without `environmentId` these cards set
-   up Live, which is for going live.
+   `open_enable_wathba_pay_form` and the member turns the simulation on.
+   Without `environmentId` these set up Live, which is for going live.
    Authentica app names are unique across all apps: suggest the project's own
-   name first, never a name another of the member's projects uses.
+   name first, never a name another of the member's projects uses. In the
+   chat, read `get_authentica_enablement` for the channels, code validity and
+   price per code before asking.
    Once Authentica is enabled in Live, ask the member, as that turn's only
-   step, whether they want to run a free live test now. If they say yes, open
-   `open_authentica_live_test_card`: the member enters their own phone number
-   or email there, then verifies the code they receive. When its outcome is
-   `use_portal`, share its portal link. Never send a test yourself. A
-   number that just got a code cannot get another until that code expires, so
-   test the app's login with another number or after a short wait.
-   To go live, Wathba Pay (card payments through Moyasar) is applied for in
-   its card without `environmentId`: the member picks a verified business
-   identity, enters the checkout name, statement descriptor and website,
-   accepts the terms and presses Start.
-   Wathba checks the website and submits to Moyasar when it passes; never call
-   `enable_wathba_pay` yourself. Pass `website` when you know the app's public
-   address. If the check finds problems and the website's code is in this
-   repository, fix the listed items and get the change deployed, then call
-   `check_wathba_pay_website` and poll `get_wathba_pay_enablement` until the
-   check finishes; repeat until it passes. Then ask the member to open the
-   card and submit: only the member submits, since they accept the terms
-   there. Moyasar's documents, signing and turning payments
-   on happen later in the portal: give the member the link. The application
-   and the payments simulation are independent: the member can apply while
-   the sandbox keeps simulating, during Moyasar's review and after.
-   To find and buy a .sa domain, open `open_domain_search_card`: the member
-   picks an identity and a name built from their own name, and the card tells
-   you the chosen domain, its price and whether the wallet covers it. If it
-   doesn't, ask the member to top up their wallet (the card links it) and wait;
-   otherwise open `open_domain_purchase_card` with the same project, identity
-   and domain. The member confirms the payment there with a code Wathba emails
-   them; never ask for, read or type that code. Check the outcome with
-   `get_domain_purchase`. Cards show where things stand each time they open,
-   and Wathba never buys one domain name twice: for a domain already
-   submitted or registered, tell the member instead of opening another
-   purchase card.
+   step, whether they want to run a free live test now. If they say yes, call
+   `open_authentica_live_test_card`: the member gives their own phone number
+   or email, then the code they receive. Never send a test the member did not
+   ask for. A number that just got a code cannot get another until that code
+   expires, so test the app's login with another number or after a short wait.
+   To go live, Wathba Pay (card payments through Moyasar) is applied for with
+   `open_enable_wathba_pay_form` without `environmentId`: the member picks a
+   verified business identity, enters the checkout name, statement descriptor
+   and website and accepts the Wathba Pay terms. Wathba checks the website and
+   submits to Moyasar when it passes. In the chat, Wathba then emails the
+   member a code: show them the terms, and pass the code only if they accept.
+   Pass `website` when you know the app's public address. If the check finds
+   problems and the website's code is in this repository, fix the listed
+   items and get the change deployed, then call `check_wathba_pay_website` and
+   poll `get_wathba_pay_enablement` until the check finishes; repeat until it
+   passes, then call `open_enable_wathba_pay_form` again so the member
+   submits: only the member accepts the terms. Moyasar's documents, signing
+   and turning payments on happen later in the portal: give the member the
+   link. The application and the payments simulation are independent: the
+   member can apply while the sandbox keeps simulating, during Moyasar's
+   review and after.
+   To find and buy a .sa domain, call `open_domain_search_card`. A .sa name
+   must be the person's own name (two parts, or one part and a number) or a
+   business's exact official name; the card or the form suggests names built
+   from the identity, while in the chat the member types the name they want.
+   You learn the chosen domain, its price and whether the wallet covers it.
+   If it doesn't, ask the member to top up their wallet and wait; otherwise
+   call `open_domain_purchase_card` with the same project, identity and
+   domain, after the member agreed to the price. The purchase is confirmed
+   only with a code Wathba emails the member. Check the outcome with
+   `get_domain_purchase`. Wathba never buys one domain name twice: for a
+   domain already submitted or registered, tell the member instead of buying
+   it again.
 5. For each service the app needs, call `get_service_integration_docs` once
    with the `integrationDocs` arguments from `list_project_services` (configured
    and available services both carry them), setting `language` to `ar` for an
@@ -132,7 +145,8 @@ replace the member's confirmation.
    keep the file git-ignored; the member pastes the key there, never in this
    chat. The key page sets the key's access; never ask the member to choose
    scopes. When its outcome is `use_portal`, share the key page link it
-   returns and wait for the member to say the key is saved.
+   returns; `opened` means the host offered the member the page itself.
+   Either way, wait for the member to say the key is saved.
    Going live means enabling each service in production (Authentica's Live
    setup, the Wathba Pay application) and swapping `WATHBA_API_KEY` for the
    Live key. On member API 2026-10-18 or later (`/v1/ex` paths) the app's
