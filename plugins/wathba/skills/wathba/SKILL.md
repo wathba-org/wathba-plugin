@@ -107,6 +107,12 @@ replace the member's confirmation.
    `sandbox-test-values` article lists the values that succeed and fail. When
    `readiness` is null the service is not enabled yet: write the integration
    anyway, then tell the member which services to enable.
+   For an Authentica OTP screen, build one send action, then the code field,
+   then Resend after about 60 seconds and not before the send's
+   `result.expiresAt`. A send answers 200 (sent), 422 or 503 at once, so
+   never add a status-check button or polling. A rare 202 is the app
+   server's job: it retries the identical request with the same
+   Idempotency-Key.
 6. Build and test in the sandbox first. Once you have read the docs (and, in
    Live, the member has finished or declined the live test), finish with
    `open_create_api_key_card` for the environment the app runs against: the
