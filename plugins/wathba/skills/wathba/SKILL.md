@@ -92,9 +92,17 @@ replace the member's confirmation.
    items and get the change deployed, then call `check_wathba_pay_website` and
    poll `get_wathba_pay_enablement` until the check finishes; repeat until it
    passes, then call `open_enable_wathba_pay_form` again so the member
-   submits: only the member accepts the terms. Moyasar's documents, signing
-   and turning payments on happen later in the portal: give the member the
-   link. The application and the payments simulation are independent: the
+   submits: only the member accepts the terms. After submit, Moyasar reviews
+   the application: read it with `get_wathba_pay_enablement` and act on its
+   `nextStep` with `continue_wathba_pay_application`. `send_info` sends the
+   requested details. `upload_link` gives a one-time link: run its curl
+   command with the member's file, and never paste a file into the chat;
+   without a shell, give the member `portalUrl`. `resubmit` sends the
+   application back once everything is in. `sign_link` gives the page where
+   the member signs Moyasar's contract with Nafath; read the state again after
+   they sign. `turn_on` turns card payments on, only after the member says
+   yes. While `nextStep` is `wait`, Moyasar is reviewing: read again later
+   instead of polling. The application and the payments simulation are independent: the
    member can apply while the sandbox keeps simulating, during Moyasar's
    review and after.
    To find and buy a .sa domain, call `open_domain_search_card`. A .sa name
@@ -106,9 +114,17 @@ replace the member's confirmation.
    call `open_domain_purchase_card` with the same project, identity and
    domain, after the member agreed to the price. The purchase is confirmed
    only with a code Wathba emails the member. Check the outcome with
-   `get_domain_purchase`. Wathba never buys one domain name twice: for a
+   `get_domain_purchase`; with only `projectId` it lists the project's
+   purchases. The registrar reviews a .sa name by hand, which can take a day,
+   so tell the member and don't keep checking. After `releasableAt` the
+   member may stop waiting: ask them first, then call
+   `open_domain_purchase_card` with `purchaseId` and `releaseHold`. Wathba never buys one domain name twice: for a
    domain already submitted or registered, tell the member instead of buying
-   it again.
+   it again. Once registered, read a domain's DNS records and name servers
+   with `get_domain_dns_records`. Change one record the member asked for
+   with `change_domain_dns_record`; it works only while the domain uses
+   Wathba's name servers. Change the name servers with
+   `change_domain_nameservers`. Say what you will change before you change it.
 5. For each service the app needs, call `get_service_integration_docs` once
    with the `integrationDocs` arguments from `list_project_services` (configured
    and available services both carry them), setting `language` to `ar` for an
