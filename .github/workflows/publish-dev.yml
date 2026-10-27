@@ -1,14 +1,16 @@
 name: Publish DEV marketplace
 
-# Builds the DEV marketplace from develop and publishes it to the dev branch,
-# which members add with `wathba-org/wathba-plugin#dev` (Claude Code) or
-# `--ref dev` (Codex). Only this workflow writes to dev. Changes reach DEV
-# first; production gets them when develop is promoted to main by a PR.
+# Builds the DEV marketplace from the dev source branch and publishes it to
+# the dev-marketplace branch, which members add with
+# `wathba-org/wathba-plugin#dev-marketplace` (Claude Code) or
+# `--ref dev-marketplace` (Codex). Only this workflow writes to
+# dev-marketplace. Changes reach DEV first; production gets them when dev is
+# promoted to main by a PR.
 
 on:
   push:
     branches:
-      - develop
+      - dev
     paths:
       - plugin.config.json
       - src/**
@@ -30,19 +32,18 @@ env:
 
 jobs:
   publish:
-    # Only develop is published, and always its latest commit: a manual run
-    # from another branch cannot publish unreviewed content, and a delayed
-    # older run rebuilds the current develop instead of overwriting newer DEV
-    # content.
-    if: github.ref == 'refs/heads/develop'
+    # Only dev is published, and always its latest commit: a manual run from
+    # another branch cannot publish unreviewed content, and a delayed older
+    # run rebuilds the current dev instead of overwriting newer DEV content.
+    if: github.ref == 'refs/heads/dev'
     runs-on: ubuntu-24.04
     permissions:
       contents: write
     steps:
-      - name: Checkout develop
+      - name: Checkout dev
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          ref: develop
+          ref: dev
           fetch-depth: 0
 
       - name: Set up Node.js
@@ -60,9 +61,9 @@ jobs:
           digest="$(node scripts/sync.mjs digest --target dev)"
           echo "digest=$digest" >>"$GITHUB_OUTPUT"
           published=""
-          if git ls-remote --exit-code --heads origin dev >/dev/null; then
-            git fetch --quiet origin dev
-            published="$(git show origin/dev:plugins/wathba-dev/release.json | jq -r '.contentDigest')"
+          if git ls-remote --exit-code --heads origin dev-marketplace >/dev/null; then
+            git fetch --quiet origin dev-marketplace
+            published="$(git show origin/dev-marketplace:plugins/wathba-dev/release.json | jq -r '.contentDigest')"
           fi
           if [[ "$published" == "$digest" ]]; then
             echo "DEV content $digest is already published."
@@ -82,14 +83,15 @@ jobs:
           scripts/check-oauth.sh dev
           echo "VERSION=$version" >>"$GITHUB_ENV"
 
-      - name: Commit to the dev branch
+      - name: Commit to the dev-marketplace branch
         if: steps.digest.outputs.changed == 'true'
         run: |
           set -euo pipefail
           branch="$RUNNER_TEMP/dev-branch"
-          # Work detached and push HEAD:dev, so no local branch can collide.
-          if git ls-remote --exit-code --heads origin dev >/dev/null; then
-            git worktree add --detach "$branch" origin/dev
+          # Work detached and push HEAD:dev-marketplace, so no local branch
+          # can collide.
+          if git ls-remote --exit-code --heads origin dev-marketplace >/dev/null; then
+            git worktree add --detach "$branch" origin/dev-marketplace
           else
             git worktree add --detach "$branch"
             git -C "$branch" switch --orphan dev-publish
@@ -104,5 +106,5 @@ jobs:
           git -C "$branch" -c user.name="github-actions[bot]" \
             -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
             commit --quiet -m "publish DEV ${VERSION} from $(git rev-parse --short=12 HEAD)"
-          git -C "$branch" push origin HEAD:refs/heads/dev
+          git -C "$branch" push origin HEAD:refs/heads/dev-marketplace
           echo "Published wathba-dev ${VERSION} (${{ steps.digest.outputs.digest }})."
