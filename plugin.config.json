@@ -65,6 +65,8 @@
       "open_domain_search_card",
       "open_enable_authentica_form",
       "open_enable_wathba_pay_form",
+      "open_wallet_top_up_card",
+      "open_webhooks_card",
       "report_issue",
       "requests_link",
       "sign_link",
