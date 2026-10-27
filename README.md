@@ -10,7 +10,7 @@ sign in through the browser (OAuth).
 | Environment | Branch | Install id | MCP server |
 |---|---|---|---|
 | Production | `main` | `wathba@wathba` | `https://api.wathba.sa/mcp` |
-| Development | `dev` | `wathba-dev@wathba-development` | `https://apidev.wathba.sa/mcp` |
+| Development | `dev` (built from `develop`) | `wathba-dev@wathba-development` | `https://apidev.wathba.sa/mcp` |
 
 ## Install
 
@@ -62,8 +62,8 @@ icon hash.
 
 | Workflow | When | What it does |
 |---|---|---|
-| `validate` | Every PR, push to `main`, weekly | Generator rules, version rule, then installs both builds into throwaway Claude Code and Codex homes, then checks the live OAuth metadata |
-| `publish-dev` | Push to `main` | Builds the development marketplace, verifies it, and publishes it to the `dev` branch |
+| `validate` | Every PR, push to `main` or `develop`, weekly | Generator rules, version rule, then installs both builds into throwaway Claude Code and Codex homes, then checks the live OAuth metadata |
+| `publish-dev` | Push to `develop` | Builds the development marketplace, verifies it, and publishes it to the `dev` branch |
 | `drift` | Daily | Checks both environments' live OAuth metadata and opens an issue when it stops matching |
 | `release` | `v*` tag on `main` | GitHub release with the plugin ZIP, then the MCP Registry entry |
 
@@ -73,25 +73,33 @@ that allows.
 
 ## Change the plugin
 
-1. Edit `plugin.config.json` or `src/`.
+Changes reach DEV first and production later, like the platform.
+
+1. Branch from `develop` and edit `plugin.config.json` or `src/`.
 2. Run `node scripts/sync.mjs check`.
-3. If the production package changes, raise `version` in
-   `plugin.config.json`. CI refuses a changed package with the same version,
-   because Claude Code updates only when the version changes.
-4. Open a pull request. Every change here reaches members' agents, so the
-   owner's review is required.
+3. Open a pull request into `develop`. When it merges, `publish-dev` publishes
+   it to DEV agents as `<version>-dev.<run>`. No version bump is needed here.
+   The owner's review is required: it reaches DEV members' agents.
 
 `contract.json` lists the Wathba tools the skill names. The platform's CI reads
 it and fails a backend change that would remove or rename one of them.
 
 ## Release production
 
-1. Merge the change (with its higher `version`) to `main`. Plugin installs pick
-   it up from `main`.
+Promote once the matching Wathba platform release is in production, so the
+skill never names tools the production server doesn't serve yet.
+
+1. Open a pull request from `develop` into `main` that raises `version` in
+   `plugin.config.json`. CI refuses a changed package with the same version,
+   because Claude Code updates only when the version changes. Merge it:
+   production installs pick it up from `main`.
 2. Tag the merge commit `v<version>` and push the tag. `release.yml` checks that
    the tag, config and package agree, attaches the plugin ZIP, `server.json` and
    checksums to a GitHub release, then publishes `server.json` to the official
    MCP Registry after the owner approves the `registry` environment.
+
+A production hotfix goes into `main` by its own pull request (with a higher
+`version`); merge `main` back into `develop` right after.
 
 `listing/` holds the material for the Anthropic and OpenAI directories.
 

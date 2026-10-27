@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - develop
   workflow_dispatch:
   schedule:
     # Weekly run on the pinned CLIs catches host-side format changes early.
@@ -43,8 +44,10 @@ jobs:
       - name: Generator rules (both targets, committed root output)
         run: node scripts/sync.mjs check
 
+      # Only a promotion into main (production) must raise the version; DEV
+      # builds are numbered <version>-dev.<run> by publish-dev.
       - name: Version must grow when the published plugin changes
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && github.base_ref == 'main'
         env:
           BASE_REF: ${{ github.base_ref }}
         run: node scripts/sync.mjs version-rule --base "origin/${BASE_REF}"
