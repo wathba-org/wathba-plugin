@@ -96,8 +96,11 @@ replace the member's confirmation.
    the application: read it with `get_wathba_pay_enablement` and act on its
    `nextStep` with `continue_wathba_pay_application`. `requests_link` opens
    the page where the member reads Moyasar's note and sends what Moyasar asks
-   for, details and files; never ask for them in the chat. `resubmit` sends the
-   application back once everything is in. `sign_link` opens the page where
+   for, details and files; never ask for them in the chat. When
+   `review.hasComment` is true, give the member `requests_link` first so they
+   read Moyasar's note, and resubmit only after they have acted on it.
+   `resubmit` sends the application back once everything is in, only after
+   the member says yes. `sign_link` opens the page where
    the member signs Moyasar's contract with Nafath; read the state again after
    they sign. `turn_on` turns card payments on, only after the member says
    yes. While `nextStep` is `wait`, Moyasar is reviewing: read again later
@@ -192,11 +195,14 @@ replace the member's confirmation.
 
 Wathba tools read, guide and create sandbox projects. Enabling a portal-only
 service, API keys, funding the wallet, spending limits, provider terms,
-production and deployment stay with the member: give the portal link from the
-result or notice and say what it unblocks.
+production and deployment stay with the member: say what to do and what it
+unblocks. Share a link only when a result or notice gives a one-job Wathba
+page (such as the API key or Wathba Pay pages); never send the member to the
+portal in general.
 
 When the member asks for their wallet balance, read it only as `list_projects`
-describes. If its description offers no wallet read, give the wallet link. If
+describes. If its description offers no wallet read, say you can't read it
+here. If
 the read answers `authorization_required`, ask the member to reconnect Wathba
 in the host. A balance is read-only and never permission to spend.
 
