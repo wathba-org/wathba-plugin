@@ -203,6 +203,10 @@ signing secrets and card details appear only on the Wathba pages these open,
 never in this chat; the app reads `WATHBA_API_KEY` and
 `WATHBA_WEBHOOK_SECRET` from its git-ignored env file. Revoking a key and
 disabling a webhook are permanent: do them only after the member says yes.
+Choosing events replaces an endpoint's whole list: read its current events
+first, and for "add X" send the current events plus X. If the new list stops
+any event, or narrows "all events", tell the member exactly what stops and
+change it only after they agree.
 If one of these tools is not in your tool list, tell the member it isn't
 available from the agent yet.
 
