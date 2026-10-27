@@ -10,7 +10,7 @@ ever goes through the chat.
 ## Claude Code
 
 ```text
-/plugin marketplace add wathba-org/wathba-plugin#dev
+/plugin marketplace add wathba-org/wathba-plugin#dev-marketplace
 /plugin install wathba-dev@wathba-development
 ```
 
@@ -21,7 +21,7 @@ automatically, open `/plugin`, go to Marketplaces, select
 ## Codex and the ChatGPT desktop app
 
 ```sh
-codex plugin marketplace add wathba-org/wathba-plugin --ref dev
+codex plugin marketplace add wathba-org/wathba-plugin --ref dev-marketplace
 codex plugin add wathba-dev@wathba-development
 ```
 
