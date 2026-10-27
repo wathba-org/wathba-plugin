@@ -102,7 +102,9 @@ replace the member's confirmation.
    the member signs Moyasar's contract with Nafath; read the state again after
    they sign. `turn_on` turns card payments on, only after the member says
    yes. While `nextStep` is `wait`, Moyasar is reviewing: read again later
-   instead of polling. The application and the payments simulation are independent: the
+   instead of polling. If `continue_wathba_pay_application` is not in your
+   tool list, the member finishes these steps in the Wathba portal: give
+   them the link. The application and the payments simulation are independent: the
    member can apply while the sandbox keeps simulating, during Moyasar's
    review and after.
    To find and buy a .sa domain, call `open_domain_search_card`. A .sa name
@@ -125,6 +127,8 @@ replace the member's confirmation.
    with `change_domain_dns_record`; it works only while the domain uses
    Wathba's name servers. Change the name servers with
    `change_domain_nameservers`. Say what you will change before you change it.
+   If one of these tools is not in your tool list, the member makes that
+   change in the Wathba portal.
 5. For each service the app needs, call `get_service_integration_docs` once
    with the `integrationDocs` arguments from `list_project_services` (configured
    and available services both carry them), setting `language` to `ar` for an
