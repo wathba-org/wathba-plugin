@@ -107,7 +107,7 @@
       "composerIconTheme": "dark"
     },
     "dev": {
-      "branch": "dev",
+      "branch": "dev-marketplace",
       "marketplace": "wathba-development",
       "marketplaceDisplayName": "Wathba Development",
       "plugin": "wathba-dev",

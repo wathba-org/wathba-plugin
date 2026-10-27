@@ -10,7 +10,7 @@ sign in through the browser (OAuth).
 | Environment | Branch | Install id | MCP server |
 |---|---|---|---|
 | Production | `main` | `wathba@wathba` | `https://api.wathba.sa/mcp` |
-| Development | `dev` (built from `develop`) | `wathba-dev@wathba-development` | `https://apidev.wathba.sa/mcp` |
+| Development | `dev-marketplace` (built from `dev`) | `wathba-dev@wathba-development` | `https://apidev.wathba.sa/mcp` |
 
 ## Install
 
@@ -21,7 +21,7 @@ sign in through the browser (OAuth).
 /plugin install wathba@wathba
 ```
 
-For the development environment, add `wathba-org/wathba-plugin#dev` and
+For the development environment, add `wathba-org/wathba-plugin#dev-marketplace` and
 install `wathba-dev@wathba-development`. Then run `/mcp`, choose the Wathba
 server and sign in. To get updates automatically, open `/plugin`, go to
 Marketplaces, select the marketplace and choose Enable auto-update.
@@ -33,7 +33,7 @@ codex plugin marketplace add wathba-org/wathba-plugin
 codex plugin add wathba@wathba
 ```
 
-For the development environment, add `--ref dev` and install
+For the development environment, add `--ref dev-marketplace` and install
 `wathba-dev@wathba-development`. Installing from the app's Plugins page starts
 sign-in; in a terminal, run `codex mcp login wathba` (or `wathba-dev`). Codex
 checks the marketplace for updates when it starts.
@@ -62,8 +62,8 @@ icon hash.
 
 | Workflow | When | What it does |
 |---|---|---|
-| `validate` | Every PR, push to `main` or `develop`, weekly | Generator rules, version rule, then installs both builds into throwaway Claude Code and Codex homes, then checks the live OAuth metadata |
-| `publish-dev` | Push to `develop` | Builds the development marketplace, verifies it, and publishes it to the `dev` branch |
+| `validate` | Every PR, push to `main` or `dev`, weekly | Generator rules, version rule, then installs both builds into throwaway Claude Code and Codex homes, then checks the live OAuth metadata |
+| `publish-dev` | Push to `dev` | Builds the development marketplace, verifies it, and publishes it to the `dev-marketplace` branch |
 | `drift` | Daily | Checks both environments' live OAuth metadata and opens an issue when it stops matching |
 | `release` | `v*` tag on `main` | GitHub release with the plugin ZIP, then the MCP Registry entry |
 
@@ -75,9 +75,9 @@ that allows.
 
 Changes reach DEV first and production later, like the platform.
 
-1. Branch from `develop` and edit `plugin.config.json` or `src/`.
+1. Branch from `dev` and edit `plugin.config.json` or `src/`.
 2. Run `node scripts/sync.mjs check`.
-3. Open a pull request into `develop`. When it merges, `publish-dev` publishes
+3. Open a pull request into `dev`. When it merges, `publish-dev` publishes
    it to DEV agents as `<version>-dev.<run>`. No version bump is needed here.
    The owner's review is required: it reaches DEV members' agents.
 
@@ -89,7 +89,7 @@ it and fails a backend change that would remove or rename one of them.
 Promote once the matching Wathba platform release is in production, so the
 skill never names tools the production server doesn't serve yet.
 
-1. Open a pull request from `develop` into `main` that raises `version` in
+1. Open a pull request from `dev` into `main` that raises `version` in
    `plugin.config.json`. CI refuses a changed package with the same version,
    because Claude Code updates only when the version changes. Merge it:
    production installs pick it up from `main`.
@@ -99,7 +99,7 @@ skill never names tools the production server doesn't serve yet.
    MCP Registry after the owner approves the `registry` environment.
 
 A production hotfix goes into `main` by its own pull request (with a higher
-`version`); merge `main` back into `develop` right after.
+`version`); merge `main` back into `dev` right after.
 
 `listing/` holds the material for the Anthropic and OpenAI directories.
 
