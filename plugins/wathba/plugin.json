@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "wathba",
-  "version": "2.4.1",
+  "version": "2.4.2",
   "description": "Connect your coding agent to Wathba over MCP: projects, notices, service docs, sandbox project creation and member-confirmed API upgrades for Saudi payments, OTP/SMS, KYC, ZATCA e-invoicing and shipping.",
   "author": {
     "name": "Wathba",
@@ -44,7 +44,7 @@
         "defaultPrompt": [
           "List my Wathba projects and any notices that need my attention.",
           "Which Wathba services fit this repository?",
-          "Add Wathba OTP to this app."
+          "Add Authentica OTP to this app."
         ]
       }
     }
