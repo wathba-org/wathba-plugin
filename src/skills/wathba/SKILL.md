@@ -105,7 +105,8 @@ replace the member's confirmation.
    they sign. `turn_on` turns card payments on, only after the member says
    yes. While `nextStep` is `wait`, Moyasar is reviewing: read again later
    instead of polling. If `continue_wathba_pay_application` is not in your
-   tool list, the member finishes these steps in the Wathba portal. The application and the payments simulation are independent: the
+   tool list, tell the member these steps aren't available through this
+   connection yet. The application and the payments simulation are independent: the
    member can apply while the sandbox keeps simulating, during Moyasar's
    review and after.
    To find and buy a .sa domain, call `open_domain_search_card`. A .sa name
@@ -124,8 +125,10 @@ replace the member's confirmation.
    has passed, the member may stop waiting; without `releasableAt`, never
    guess. First tell them that the held price goes back to their wallet, but
    the registrar can't withdraw the request: if it approves later, the domain
-   is theirs and the price is taken from the wallet then. Only if they agree,
-   call `open_domain_purchase_card` with `purchaseId` and `releaseHold`.
+   is theirs and the price is taken from the wallet then. Only if they agree:
+   where cards show, open `open_domain_purchase_card` again with the same
+   project, identity and domain, and the member presses Stop waiting on that
+   purchase; elsewhere, call it with `purchaseId` and `releaseHold`.
    Wathba never buys one domain name twice: for a
    domain already submitted or registered, tell the member instead of buying
    it again. Once registered, read a domain's DNS records and name servers
