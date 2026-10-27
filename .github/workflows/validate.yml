@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - main
-      - develop
+      - dev
   workflow_dispatch:
   schedule:
     # Weekly run on the pinned CLIs catches host-side format changes early.
