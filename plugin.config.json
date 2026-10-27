@@ -72,12 +72,11 @@
       "prepare_domain_purchase",
       "quote_domain",
       "report_issue",
+      "requests_link",
       "send_authentica_free_test",
       "send_domain_purchase_code",
-      "send_info",
       "sign_link",
       "turn_on",
-      "upload_link",
       "use_chat",
       "use_portal",
       "verify_authentica_live_test"

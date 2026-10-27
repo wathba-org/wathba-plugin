@@ -94,17 +94,15 @@ replace the member's confirmation.
    passes, then call `open_enable_wathba_pay_form` again so the member
    submits: only the member accepts the terms. After submit, Moyasar reviews
    the application: read it with `get_wathba_pay_enablement` and act on its
-   `nextStep` with `continue_wathba_pay_application`. `send_info` sends the
-   requested details. `upload_link` gives a one-time link: run its curl
-   command with the member's file, and never paste a file into the chat;
-   without a shell, give the member `portalUrl`. `resubmit` sends the
-   application back once everything is in. `sign_link` gives the page where
+   `nextStep` with `continue_wathba_pay_application`. `requests_link` opens
+   the page where the member reads Moyasar's note and sends what Moyasar asks
+   for, details and files; never ask for them in the chat. `resubmit` sends the
+   application back once everything is in. `sign_link` opens the page where
    the member signs Moyasar's contract with Nafath; read the state again after
    they sign. `turn_on` turns card payments on, only after the member says
    yes. While `nextStep` is `wait`, Moyasar is reviewing: read again later
    instead of polling. If `continue_wathba_pay_application` is not in your
-   tool list, the member finishes these steps in the Wathba portal: give
-   them the link. The application and the payments simulation are independent: the
+   tool list, the member finishes these steps in the Wathba portal. The application and the payments simulation are independent: the
    member can apply while the sandbox keeps simulating, during Moyasar's
    review and after.
    To find and buy a .sa domain, call `open_domain_search_card`. A .sa name
