@@ -2,7 +2,7 @@
   "name": "wathba",
   "displayName": "Wathba",
   "version": "2.4.2",
-  "description": "Connect your coding agent to Wathba over MCP: projects, notices, service docs, sandbox project creation and member-confirmed API upgrades for Saudi payments, OTP/SMS, KYC, ZATCA e-invoicing and shipping.",
+  "description": "Connect your coding agent to Wathba over MCP: projects, notices, service docs, sandbox project creation and member-confirmed API upgrades for Saudi payments, OTP and domains.",
   "author": {
     "name": "Wathba",
     "email": "juriba@wathba.sa",
@@ -17,8 +17,6 @@
     "mcp",
     "payments",
     "otp",
-    "kyc",
-    "zatca",
-    "shipping"
+    "domains"
   ]
 }

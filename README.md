@@ -3,8 +3,7 @@
 The official [Wathba (وثبة)](https://wathba.sa) plugin for AI coding agents.
 It connects Codex, the ChatGPT desktop app, Claude Code and other Agent Plugins
 clients to Wathba's hosted MCP server, and adds one short skill that tells the
-agent how to use it. Payments, OTP/SMS, KYC, ZATCA e-invoicing and shipping
-reach your app through Wathba; the plugin never handles API keys, and members
+agent how to use it. Payments, OTP and domains reach your app through Wathba; the plugin never handles API keys, and members
 sign in through the browser (OAuth).
 
 | Environment | Branch | Install id | MCP server |

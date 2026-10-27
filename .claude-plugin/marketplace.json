@@ -12,7 +12,7 @@
     {
       "name": "wathba",
       "source": "./plugins/wathba",
-      "description": "Connect your coding agent to Wathba over MCP: projects, notices, service docs, sandbox project creation and member-confirmed API upgrades for Saudi payments, OTP/SMS, KYC, ZATCA e-invoicing and shipping.",
+      "description": "Connect your coding agent to Wathba over MCP: projects, notices, service docs, sandbox project creation and member-confirmed API upgrades for Saudi payments, OTP and domains.",
       "category": "developer-tools",
       "keywords": [
         "wathba",
@@ -20,9 +20,7 @@
         "mcp",
         "payments",
         "otp",
-        "kyc",
-        "zatca",
-        "shipping"
+        "domains"
       ]
     }
   ]
