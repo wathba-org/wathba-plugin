@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "wathba-dev",
-  "version": "2.5.0-dev.35",
-  "description": "Connect your coding agent to the Wathba development environment over MCP: projects, notices, service docs, sandbox project creation and member-confirmed API upgrades for Saudi payments, OTP/SMS, KYC, ZATCA e-invoicing and shipping.",
+  "version": "2.5.0-dev.36",
+  "description": "Connect your coding agent to the Wathba development environment over MCP: projects, notices, service docs, sandbox project creation and member-confirmed API upgrades for Saudi payments, OTP and domains.",
   "author": {
     "name": "Wathba",
     "email": "juriba@wathba.sa",
@@ -17,16 +17,14 @@
     "mcp",
     "payments",
     "otp",
-    "kyc",
-    "zatca",
-    "shipping"
+    "domains"
   ],
   "extensions": {
     "com.openai": {
       "interface": {
         "displayName": "Wathba Dev",
         "shortDescription": "Wathba DEV environment",
-        "longDescription": "Connect your coding agent to the Wathba development environment over MCP: projects, notices, service docs, sandbox project creation and member-confirmed API upgrades for Saudi payments, OTP/SMS, KYC, ZATCA e-invoicing and shipping.",
+        "longDescription": "Connect your coding agent to the Wathba development environment over MCP: projects, notices, service docs, sandbox project creation and member-confirmed API upgrades for Saudi payments, OTP and domains.",
         "developerName": "Wathba",
         "category": "Developer Tools",
         "capabilities": [
@@ -44,7 +42,7 @@
         "defaultPrompt": [
           "List my Wathba projects and any notices that need my attention.",
           "Which Wathba services fit this repository?",
-          "Add Wathba OTP to this app."
+          "Add Authentica OTP to this app."
         ]
       }
     }
