@@ -57,6 +57,7 @@
       "get_domain_dns_records",
       "get_domain_purchase",
       "get_wathba_pay_enablement",
+      "list_eligible_domains",
       "open_authentica_live_test_card",
       "open_create_api_key_card",
       "open_domain_purchase_card",
