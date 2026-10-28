@@ -194,10 +194,11 @@ holds.
    code could not be confirmed and hides the code field (no earlier code
    verifies either); in Live, Wathba refuses a new code to that recipient
    until the code validity plus about 90 seconds have passed.
-6. Build and test in the sandbox first. Once you have read the docs (and, in
-   Live, the member has finished or declined the live test), finish with
-   `open_create_api_key_card` for the environment the app runs against: the
-   sandbox while it tests, Live when it goes live. The key is the project's
+6. Build and test in the sandbox first. The app needs the sandbox key to
+   reach the sandbox, so once you have written the integration, open
+   `open_create_api_key_card` for the sandbox before you test. When the app
+   goes live (and the member has finished or declined the live test), open
+   it again for Live. The key is the project's
    key for that environment and serves every service, so the app reads it
    from `WATHBA_API_KEY`, never a service-specific name. First add an
    empty `WATHBA_API_KEY=` line to the env file (or reuse the one there) and
