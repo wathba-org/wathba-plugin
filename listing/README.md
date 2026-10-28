@@ -36,20 +36,20 @@ rejects any icon that is not a square PNG of 48 to 4096 pixels under 5 MiB.
 
 **Name:** Wathba (وثبة)
 
-**Tagline (en):** Saudi payments, OTP, KYC, ZATCA and shipping for your app.
+**Tagline (en):** Saudi payments, OTP and domains for your app.
 
-**Tagline (ar):** المدفوعات والتحقق برمز OTP والتحقق من الهوية والفوترة الإلكترونية والشحن لتطبيقك في السعودية.
+**Tagline (ar):** المدفوعات والتحقق برمز OTP والنطاقات لتطبيقك في السعودية.
 
-**Description (en):** Wathba gives your app Saudi payments, OTP/SMS, identity
-verification (KYC), ZATCA e-invoicing and shipping through one catalog. Connect
+**Description (en):** Wathba gives your app Saudi payments, OTP and domains
+through one catalog. Connect
 your coding agent and it reads your Wathba projects and notices, recommends
 services for your repository, follows each service's integration docs,
 creates sandbox projects, and updates an integration's API version after you
 confirm the exact plan. You sign in through the browser; the agent never sees
 an API key.
 
-**Description (ar):** وثبة تمنح تطبيقك المدفوعات والتحقق برمز OTP والتحقق من
-الهوية والفوترة الإلكترونية وفق متطلبات زاتكا والشحن عبر كتالوج واحد. اربط
+**Description (ar):** وثبة تمنح تطبيقك المدفوعات والتحقق برمز OTP والنطاقات عبر
+كتالوج واحد. اربط
 وكيلك البرمجي ليقرأ مشاريعك وتنبيهاتك في وثبة، ويقترح الخدمات المناسبة
 لمستودعك، ويتبع وثائق التكامل لكل خدمة، وينشئ مشاريع اختبارية، ويحدّث
 إصدار API للتكامل بعد تأكيدك للخطة بدقة. تسجّل الدخول عبر المتصفح، ولا يرى
@@ -87,7 +87,7 @@ the member approves it on the Wathba consent page.
 
 Card tools act only on what the member confirms inside a Wathba card; API keys
 are shown to the member, never returned to the model. The tools never fund the
-wallet, accept provider terms, deploy, or run payment or shipping operations
+wallet, accept provider terms, deploy, or run payment or OTP operations
 for the member's app. Where the member allowed it on the consent page,
 `list_projects` can show them their own wallet balance, read-only.
 
