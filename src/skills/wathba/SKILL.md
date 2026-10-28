@@ -36,11 +36,13 @@ after each step finishes, show them these go-live steps as a short checklist,
 each marked done, next or to do, with who does it:
 
 1. Sandbox (you): the project's sandbox, with each service the app needs on.
-2. Code (you): the integration, tested with the docs' sandbox test values.
+2. Code (you): the integration, written from the service's docs.
 3. Sandbox key (member): created with `open_create_api_key_card` and saved in
-   `WATHBA_API_KEY`.
-4. Deploy (member, with your help): the app running on their hosting service.
-5. Go live (member): each service on in Live, and the Live key in place of the
+   `WATHBA_API_KEY`. The app needs it to reach the sandbox.
+4. Sandbox test (you): the app run against the sandbox with the docs' sandbox
+   test values.
+5. Deploy (member, with your help): the app running on their hosting service.
+6. Go live (member): each service on in Live, and the Live key in place of the
    sandbox key wherever the app runs.
 
 Mark a step done only when a Wathba result or your own test shows it:
