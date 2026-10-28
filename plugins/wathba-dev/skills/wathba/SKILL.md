@@ -139,7 +139,14 @@ holds.
    connection yet. The application and the payments simulation are independent: the
    member can apply while the sandbox keeps simulating, during Moyasar's
    review and after.
-   To find and buy a .sa domain, call `open_domain_search_card`. A .sa name
+   To show the member the .sa domains they can buy, call
+   `list_eligible_domains`: for each identity it lists up to ten names built
+   from the identity's own name under the Saudi registry's rules, each with
+   its state, its one-year price with VAT and whether the wallet covers it.
+   Never offer a name or a price that isn't in a Wathba result. An identity
+   with `gaps` can buy only once they are completed. For another name, or if
+   `list_eligible_domains` is not in your tool list, call
+   `open_domain_search_card`. A .sa name
    must be the person's own name (two parts, or one part and a number) or a
    business's exact official name; the card or the form suggests names built
    from the identity, while in the chat the member types the name they want.
