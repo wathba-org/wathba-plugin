@@ -1,5 +1,5 @@
 {
-  "version": "2.6.0",
+  "version": "2.7.0",
   "rootTarget": "prod",
   "description": "Connect your coding agent to Wathba over MCP: projects, notices, service docs, sandbox project creation and member-confirmed API upgrades for Saudi payments, OTP and domains.",
   "shortDescription": "Saudi payments, OTP, domains",
@@ -37,6 +37,7 @@
     "tools": [
       "apply_api_upgrade",
       "create_project",
+      "get_project_setup",
       "get_service_integration_docs",
       "inspect_api_upgrade",
       "list_notices",
@@ -57,6 +58,7 @@
       "get_domain_dns_records",
       "get_domain_purchase",
       "get_wathba_pay_enablement",
+      "list_eligible_domains",
       "open_authentica_live_test_card",
       "open_create_api_key_card",
       "open_domain_purchase_card",

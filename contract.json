@@ -8,6 +8,7 @@
   "tools": [
     "apply_api_upgrade",
     "create_project",
+    "get_project_setup",
     "get_service_integration_docs",
     "inspect_api_upgrade",
     "list_notices",
