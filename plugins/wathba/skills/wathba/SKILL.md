@@ -1,6 +1,6 @@
 ---
 name: wathba
-description: "Use for anything involving Wathba (وثبة), the Saudi platform that gives apps payments, OTP/SMS, identity verification (KYC), e-invoicing (ZATCA) and shipping through one catalog. Use when the user, in Arabic or English, asks to add one of these to an app, to check Wathba projects or notices, or to connect Moyasar, Authentica, Torod or another Wathba service."
+description: "Use for anything involving Wathba (وثبة), the Saudi platform that gives apps payments (Wathba Pay), OTP (Authentica) and domains through one catalog. Use when the user, in Arabic or English, asks to add one of these to an app, to check Wathba projects or notices, or to connect Wathba Pay, Authentica or another Wathba service."
 ---
 
 # Wathba
@@ -22,6 +22,12 @@ replace the member's confirmation.
   (a live test, a domain purchase, accepting the Wathba Pay terms) is the only
   exception: when a tool asks for it in this chat, pass the member's code to
   that tool exactly, never guess one, and repeat it nowhere.
+- If a Wathba API key was exposed (pasted in the chat, committed, logged or
+  shared), never repeat it. Tell the member at once, then open
+  `open_create_api_key_card` for its environment so they revoke it (apps
+  using it stop at once) and create a new one, saved in `WATHBA_API_KEY`
+  wherever the app runs. If it was committed, the member still revokes it:
+  removing it from the code does not make it safe.
 
 ## Work
 
@@ -190,9 +196,10 @@ replace the member's confirmation.
 8. Every Wathba result carries fresh notices for the account and the project it
    touches; read those instead of calling `list_notices` after each step. Call
    it again only on a project switch or when the member asks. `noticesStatus`
-   `partial` is normal here and is no reason to call it again. Mention notices
-   about other projects once, in one grouped line, unless one blocks
-   production.
+   `partial` is normal here and is no reason to call it again or to mention
+   it. When there are no notices, say nothing about notices: no all-clear and
+   no note about partial checks. Mention notices about other projects once,
+   in one grouped line, unless one blocks production.
 
 ## Member-only steps
 

@@ -1,9 +1,9 @@
 {
-  "version": "2.5.0",
+  "version": "2.6.0",
   "rootTarget": "prod",
-  "description": "Connect your coding agent to Wathba over MCP: projects, notices, service docs, sandbox project creation and member-confirmed API upgrades for Saudi payments, OTP/SMS, KYC, ZATCA e-invoicing and shipping.",
-  "shortDescription": "Saudi payments, OTP and KYC",
-  "registryDescription": "Saudi payments, OTP/SMS, KYC, ZATCA e-invoicing and shipping for AI coding agents.",
+  "description": "Connect your coding agent to Wathba over MCP: projects, notices, service docs, sandbox project creation and member-confirmed API upgrades for Saudi payments, OTP and domains.",
+  "shortDescription": "Saudi payments, OTP, domains",
+  "registryDescription": "Saudi payments, OTP and domains for AI coding agents.",
   "publisher": {
     "name": "Wathba",
     "url": "https://wathba.sa",
@@ -17,9 +17,7 @@
     "mcp",
     "payments",
     "otp",
-    "kyc",
-    "zatca",
-    "shipping"
+    "domains"
   ],
   "branding": {
     "brandColor": "#FF5B05",
@@ -89,7 +87,7 @@
     "defaultPrompt": [
       "List my Wathba projects and any notices that need my attention.",
       "Which Wathba services fit this repository?",
-      "Add Wathba OTP to this app."
+      "Add Authentica OTP to this app."
     ]
   },
   "registry": {
