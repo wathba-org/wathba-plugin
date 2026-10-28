@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.wathba-org/wathba",
   "title": "Wathba",
-  "description": "Saudi payments, OTP/SMS, KYC, ZATCA e-invoicing and shipping for AI coding agents.",
+  "description": "Saudi payments, OTP and domains for AI coding agents.",
   "version": "2.5.0",
   "websiteUrl": "https://platform.wathba.sa/docs/mcp",
   "repository": {
