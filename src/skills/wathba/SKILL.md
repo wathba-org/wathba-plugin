@@ -157,15 +157,9 @@ holds.
    only with a code Wathba emails the member. Check the outcome with
    `get_domain_purchase` and its `purchaseId`; where it also accepts
    `projectId` alone, that lists the project's purchases. The registrar
-   reviews a .sa name by hand, which can take a day, so tell the member and
-   don't keep checking. Once a purchase shows `releasableAt` and that time
-   has passed, the member may stop waiting; without `releasableAt`, never
-   guess. First tell them that the held price goes back to their wallet, but
-   the registrar can't withdraw the request: if it approves later, the domain
-   is theirs and the price is taken from the wallet then. Only if they agree:
-   where cards show, open `open_domain_purchase_card` again with the same
-   project, identity and domain, and the member presses Stop waiting on that
-   purchase; elsewhere, call it with `purchaseId` and `releaseHold`.
+   reviews a .sa name by hand, usually within a few working days, so tell
+   the member and don't keep checking. Past two weeks Wathba follows it up
+   and may release the held price; the member can't stop waiting.
    Wathba never buys one domain name twice: for a
    domain already submitted or registered, tell the member instead of buying
    it again. Once registered, read a domain's DNS records and name servers
