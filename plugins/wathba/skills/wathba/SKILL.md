@@ -119,8 +119,9 @@ holds.
    `get_service_integration_docs` with serviceCode `calls.ai` and have the
    app's server send each abandoned checkout once, from its own checkout data.
    Never call a number from this chat. Live calls are charged per completed
-   call. `get_ai_calls` shows the latest calls; `get_ai_call` one call's
-   transcript.
+   call. Hosts without cards confirm with the same tool, in a form or the
+   chat. `get_ai_calls` shows the latest calls, or one call's transcript with
+   `callId`.
    To go live, Wathba Pay (card payments through Moyasar) is applied for with
    `open_enable_wathba_pay_form` without `environmentId`: the member picks a
    verified business identity, enters the checkout name, statement descriptor

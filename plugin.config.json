@@ -54,7 +54,6 @@
       "change_domain_nameservers",
       "check_wathba_pay_website",
       "continue_wathba_pay_application",
-      "get_ai_call",
       "get_ai_calls",
       "get_authentica_enablement",
       "get_domain_dns_records",
