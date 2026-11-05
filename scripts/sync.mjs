@@ -187,6 +187,17 @@ or every Wathba tool appears twice.
 }
 
 // Returns Map<relativePath, Buffer|string> for one marketplace tree.
+/**
+ * Parts of the skill for features only DEV has (AI calls today) sit between
+ * `<!-- dev-only... -->` and `<!-- /dev-only -->` lines: DEV keeps the text
+ * without the markers, prod drops the whole block.
+ */
+const DEV_ONLY_BLOCK = /^[ \t]*<!-- dev-only[^\n]*-->\n([\s\S]*?)^[ \t]*<!-- \/dev-only -->\n/gm;
+
+function skillFor(skill, targetName) {
+  return skill.replace(DEV_ONLY_BLOCK, (_, body) => (targetName === "prod" ? "" : body));
+}
+
 function buildFiles(config, sources, targetName, version) {
   const target = config.targets[targetName];
   const pluginDir = `plugins/${target.plugin}`;
@@ -340,7 +351,7 @@ function buildFiles(config, sources, targetName, version) {
       mcpServers: { [target.serverKey]: { type: "http", url: mcpUrl } },
     }),
   );
-  files.set(`${pluginDir}/skills/${SKILL_NAME}/SKILL.md`, sources.skill);
+  files.set(`${pluginDir}/skills/${SKILL_NAME}/SKILL.md`, skillFor(sources.skill, targetName));
   files.set(`${pluginDir}/assets/wathba-icon-light.png`, sources.icons[targetName].light);
   files.set(`${pluginDir}/assets/wathba-icon-dark.png`, sources.icons[targetName].dark);
   files.set(
@@ -508,6 +519,10 @@ function validate(config, targetName, files, version) {
       fail("skill", `declared tool ${tool} does not appear in SKILL.md`);
   if (/\bwathba (login|skill|mcp|install|integrate)\b/i.test(skill) || /npm install/i.test(skill))
     fail("skill", "the shared skill must not depend on the Wathba CLI");
+  if (skill.includes("dev-only"))
+    fail("skill", "a dev-only marker is unbalanced, so it reached the package");
+  if (targetName === "prod" && /\bAI calls?\b|ai_calls|calls\.ai/i.test(skill))
+    fail("skill", "the prod skill mentions AI calls, which only DEV has");
 
   // Contract and icon.
   const contract = parse(files, "contract.json");
