@@ -1,6 +1,6 @@
 ---
 name: wathba
-description: "Use for anything involving Wathba (وثبة), the Saudi platform that gives apps payments (Wathba Pay), OTP (Authentica), AI calls and domains through one catalog. Use when the user, in Arabic or English, asks to add one of these to an app, to check Wathba projects or notices, or to connect Wathba Pay, Authentica or another Wathba service."
+description: "Use for anything involving Wathba (وثبة), the Saudi platform that gives apps payments (Wathba Pay), OTP (Authentica) and domains through one catalog. Use when the user, in Arabic or English, asks to add one of these to an app, to check Wathba projects or notices, or to connect Wathba Pay, Authentica or another Wathba service."
 ---
 
 # Wathba
