@@ -1,6 +1,6 @@
 ---
 name: wathba
-description: "Use for anything involving Wathba (وثبة), the Saudi platform that gives apps payments (Wathba Pay), OTP (Authentica), AI calls and domains through one catalog. Use when the user, in Arabic or English, asks to add one of these to an app, to check Wathba projects or notices, or to connect Wathba Pay, Authentica or another Wathba service."
+description: "Use for anything involving Wathba (وثبة), the Saudi platform that gives apps payments (Wathba Pay), OTP (Authentica) and domains through one catalog. Use when the user, in Arabic or English, asks to add one of these to an app, to check Wathba projects or notices, or to connect Wathba Pay, Authentica or another Wathba service."
 ---
 
 # Wathba
@@ -111,6 +111,7 @@ holds.
    or email, then the code they receive. Never send a test the member did not
    ask for. A number that just got a code cannot get another until that code
    expires, so test the app's login with another number or after a short wait.
+   <!-- dev-only: AI calls exists only in DEV -->
    AI calls (Checkout follow-up): when the member says customers leave at
    checkout, offer `open_enable_ai_calls_card`. An AI voice agent calls each
    customer the app sends, reminds them of their cart and records whether
@@ -124,6 +125,7 @@ holds.
    Hosts without cards confirm with the same tool, in a form or the chat.
    `get_ai_calls` shows the latest calls, or one call's transcript with
    `callId`.
+   <!-- /dev-only -->
    To go live, Wathba Pay (card payments through Moyasar) is applied for with
    `open_enable_wathba_pay_form` without `environmentId`: the member picks a
    verified business identity, enters the checkout name, statement descriptor
