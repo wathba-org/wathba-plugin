@@ -36,7 +36,7 @@ jobs:
     # another branch cannot publish unreviewed content, and a delayed older
     # run rebuilds the current dev instead of overwriting newer DEV content.
     if: github.ref == 'refs/heads/dev'
-    runs-on: ubuntu-24.04
+    runs-on: instabox-large
     permissions:
       contents: write
     steps:

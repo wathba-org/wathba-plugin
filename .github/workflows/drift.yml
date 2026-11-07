@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   drift:
-    runs-on: ubuntu-24.04
+    runs-on: instabox-large
     permissions:
       contents: read
       issues: write

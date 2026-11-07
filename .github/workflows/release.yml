@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   release:
-    runs-on: ubuntu-24.04
+    runs-on: instabox-large
     permissions:
       contents: write
     outputs:
@@ -91,7 +91,7 @@ jobs:
 
   registry:
     needs: release
-    runs-on: ubuntu-24.04
+    runs-on: instabox-large
     # Requires the owner's approval; the OIDC token can publish any server
     # under io.github.wathba-org/*.
     environment: registry
