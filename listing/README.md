@@ -69,27 +69,31 @@ the member approves it on the Wathba consent page.
 | `list_notices` | Read | The member's actionable notices across projects |
 | `list_projects` | Read | The member's projects and environment readiness; where the member allowed it, their own wallet balance (read-only) |
 | `get_project_setup` | Read | Sandbox, production, portal and key-management guidance (no credentials) |
-| `list_project_services` | Read | Configured and available services |
-| `get_service_integration_docs` | Read | A configured service's docs for its API version: runtime, operations, limits and troubleshooting |
+| `list_project_services` | Read | Services in the project and on offer, 20 a page, searchable |
+| `get_service` | Read | One service: its state in each environment, operations, flows, requirements and next step |
+| `get_service_integration_docs` | Read | A service's docs for its API version: runtime, operations, limits and troubleshooting |
 | `recommend_services_for_repository` | Read | Recommendations from a bounded repository profile built locally; no source code is sent |
 | `create_project` | Write | Creates one sandbox project (idempotent) |
+| `open_flow` | Member step | Opens one step the member completes: a new project, API keys, webhooks, a wallet top-up, a .sa domain search or purchase, turning a service on, an Authentica live test, approving a Live operation. Shown as a Wathba card, the host's own form, or a link to one signed-in Wathba page (`/agent/flow/<flowId>`) |
+| `execute_read_operation` | Read | Runs one read operation of a service in the project; the sandbox by default |
+| `execute_write_operation` | Write | Runs one write operation in the sandbox (simulated, free); in Live it runs only after the member approves it on their signed-in Wathba page |
+| `get_domain_dns_records` | Read | A registered domain's DNS records and name servers |
+| `change_domain_dns_record` | Write | Adds, updates or deletes one DNS record the member asked for |
+| `change_domain_nameservers` | Write | Replaces a domain's name servers |
+| `report_issue` | Write | Sends a problem report to Wathba's team, only after the member confirms it |
 | `inspect_api_upgrade` | Read | Pinned version and supported contracts |
 | `preview_api_upgrade` | Write | Records sandbox contract evidence |
 | `prepare_api_upgrade` | Write | A short-lived upgrade plan bound to tested releases |
 | `apply_api_upgrade` | Write | Changes the API version pin, including production, only after the member confirms the exact plan in the conversation |
 | `rollback_api_upgrade` | Write | Restores the previous API version pin |
-| `open_create_project_form` | Card | Opens the create-project card; the member submits it |
-| `open_create_api_key_card` | Card | Opens the API-key card; the key is shown once to the member, never to the model |
-| `open_enable_authentica_form` / `enable_authentica` / `get_authentica_enablement` | Card / Write / Read | Enables Authentica OTP for a project after the member confirms in the card |
-| `open_authentica_live_test_card` / `send_authentica_free_test` / `verify_authentica_live_test` | Card / Write / Write | Sends one real test code from the card (up to 5 free a day per member) |
-| `open_enable_wathba_pay_form` / `enable_wathba_pay` | Card / Write | Submits the member's Wathba Pay (Moyasar) application from the card |
-| `open_domain_search_card` / `open_domain_purchase_card` / `confirm_domain_purchase` | Card / Card / Write | Searches and buys a .sa domain; purchase needs the code emailed to the member and is charged to the wallet |
 
-Card tools act only on what the member confirms inside a Wathba card; API keys
-are shown to the member, never returned to the model. The tools never fund the
-wallet, accept provider terms, deploy, or run payment or OTP operations
-for the member's app. Where the member allowed it on the consent page,
-`list_projects` can show them their own wallet balance, read-only.
+Wathba's cards call a few more tools themselves, hidden from the model, to act
+on what the member confirms inside the card. API keys and signing secrets are
+shown to the member, never returned to the model, and approving a Live
+operation happens only on the member's signed-in Wathba page. The tools never
+fund the wallet, accept provider terms or deploy on their own. Where the
+member allowed it on the consent page, `list_projects` can show them their own
+wallet balance, read-only.
 
 ## Data handling
 
