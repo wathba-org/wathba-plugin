@@ -3,9 +3,9 @@
   "target": "dev",
   "marketplace": "wathba-development",
   "plugin": "wathba-dev",
-  "version": "2.8.0-dev.45",
+  "version": "2.8.0-dev.46",
   "mcpEndpoint": "https://apidev.wathba.sa/mcp",
   "portalOrigin": "https://platformdev.wathba.sa",
   "credentialMode": "oauth_pkce",
-  "contentDigest": "sha256:d07ff4b682455d16284dda3b9cf9191bb5a8aadd5d0a2281e459b6effde94004"
+  "contentDigest": "sha256:fc6cb4e2bd91a77437f393cd26679d3cda50422887bed163ec5b489726720fad"
 }
