@@ -523,6 +523,11 @@ function validate(config, targetName, files, version) {
     fail("skill", "a dev-only marker is unbalanced, so it reached the package");
   if (targetName === "prod" && /\bAI calls?\b|ai_calls|calls\.ai/i.test(skill))
     fail("skill", "the prod skill mentions AI calls, which only DEV has");
+  if (
+    targetName === "prod" &&
+    /hosting\.web|\b(create_upload|start_deploy|generate_secret|get_deploy|consoleUrl|deployUrl)\b|\bWathba (hosts|hosting)\b|hosting preview/i.test(skill)
+  )
+    fail("skill", "the prod skill mentions Wathba hosting, which only DEV has");
 
   // Contract and icon.
   const contract = parse(files, "contract.json");
