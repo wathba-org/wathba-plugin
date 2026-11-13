@@ -214,6 +214,10 @@ exactly what to do, where and why, then end your turn.
      migrations first in `"start"`, calling the tool by name (no npm or
      npx); Django and Alembic migrate on their own once a database is
      linked. Rollback and take-down are the member's, on the hosting page.
+     Unlike the other sandbox services, hosting is not simulated: the app
+     runs on real servers at a public address, free to the member, and is
+     taken down 72 hours after its last deploy went live. Say so; never
+     call it a simulation.
    <!-- /dev-only -->
 5. For each service the app needs, call `get_service_integration_docs` once,
    with the `integrationDocs` arguments a result gives for it, setting
