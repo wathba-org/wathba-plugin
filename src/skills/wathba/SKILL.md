@@ -23,6 +23,11 @@ link to its file.
   credentials in chat, files or logs. Codes Wathba sends the member (a live
   test, a domain purchase, the Wathba Pay terms) are typed by the member into
   Wathba's own card, form or page, never into this chat.
+<!-- dev-only: hosting exists only in DEV sandboxes -->
+- One exception: hosting's `create_upload` returns a curl command carrying a
+  one-use upload token for one zip. Run that command as given; never print
+  the token on its own, save it or reuse it.
+<!-- /dev-only -->
 - If a Wathba API key was exposed (pasted in the chat, committed, logged or
   shared), never repeat it. Tell the member at once, then `open_flow` with
   flow `api_key` for its environment so they revoke it (apps using it stop at
@@ -114,6 +119,10 @@ each marked done, next or to do, with who does it:
 5. Deploy (member, with your help): the app running on their hosting service.
 6. Go live (member): each service on in Live, and the Live key in place of the
    sandbox key wherever the app runs.
+<!-- dev-only: hosting exists only in DEV sandboxes -->
+When the app uses no Wathba service besides hosting, it needs no key: skip
+steps 3 and 6, and step 5 is the hosting deploy below.
+<!-- /dev-only -->
 
 Mark a step done only when a Wathba result or your own test shows it:
 `get_service` or `list_project_services` for services, and `get_project_setup`
