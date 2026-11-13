@@ -201,6 +201,8 @@ exactly what to do, where and why, then end your turn.
      app online. It builds Node, Bun, Next.js, FastAPI, Flask, Django
      and Vite-style front ends, and serves a built static site; anything
      else needs a Dockerfile at the top of the zip that listens on 8080.
+     Next.js, Flask, Django and own-Dockerfile builds are still in
+     preview: if one fails, read its build log with `get_deploy`.
      Zip one app with its package.json, requirements.txt or Dockerfile at
      the top, never a monorepo. Turn it on with `open_flow` `enable`; then
      `execute_write_operation` `create_upload` (run the returned curl as
@@ -213,11 +215,15 @@ exactly what to do, where and why, then end your turn.
      app's disk is wiped on every restart. Node, Bun and Next.js run
      migrations first in `"start"`, calling the tool by name (no npm or
      npx); Django and Alembic migrate on their own once a database is
-     linked. Rollback and take-down are the member's, on the hosting page.
+     linked. Old and new copies overlap during a rollout, so keep each
+     migration backward compatible and use the framework's migration
+     lock. Rollback and take-down are the member's, on the hosting page;
+     a rollback brings back the earlier app, not the database's data.
      Unlike the other sandbox services, hosting is not simulated: the app
      runs on real servers at a public address, free to the member, and is
-     taken down 72 hours after its last deploy went live. Say so; never
-     call it a simulation.
+     taken down a few days after its last deploy went live (`get_service`
+     `hosting.web` gives the time). Say so with that time; never call it
+     a simulation.
    <!-- /dev-only -->
 5. For each service the app needs, call `get_service_integration_docs` once,
    with the `integrationDocs` arguments a result gives for it, setting
