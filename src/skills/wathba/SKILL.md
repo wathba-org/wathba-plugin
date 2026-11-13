@@ -196,8 +196,9 @@ exactly what to do, where and why, then end your turn.
      `get_call` and `input` `{"callId": "acl_..."}`.
    <!-- /dev-only -->
    <!-- dev-only: hosting exists only in DEV sandboxes -->
-   - Hosting (`hosting.web`, only where `get_service` lists it): Wathba puts
-     the app online. It builds Node, Bun, Next.js, FastAPI, Flask, Django
+   - Hosting (`hosting.web`, only where `list_project_services` lists it;
+     `get_service` `hosting.web` has its state and plans): Wathba puts the
+     app online. It builds Node, Bun, Next.js, FastAPI, Flask, Django
      and Vite-style front ends, and serves a built static site; anything
      else needs a Dockerfile at the top of the zip that listens on 8080.
      Zip one app with its package.json, requirements.txt or Dockerfile at
