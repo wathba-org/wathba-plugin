@@ -226,12 +226,16 @@ exactly what to do, where and why, then end your turn.
      Variables. Data
      goes in the database the member adds there (`DATABASE_URL`): the
      app's disk is wiped on every restart. Node, Bun and Next.js run
-     migrations first in `"start"`, calling the tool by name (no npm or
-     npx); a Next.js app with `output: 'standalone'` never runs `"start"`,
-     so leave standalone out when it migrates; Django and Alembic migrate
-     on their own once a database is linked. Old and new copies overlap during a rollout, so keep each
-     migration backward compatible and use the framework's migration
-     lock. Rollback and take-down are the member's, on the hosting page;
+     migrations first in `"start"`, calling the tool by name (a start
+     that calls npm, npx, yarn, pnpm or corepack is refused at upload).
+     A Next.js app with `output: 'standalone'` never runs `"start"`, and
+     a start that does more than `next start` is refused there, so leave
+     standalone out when it migrates. Django and Alembic migrate on their
+     own once a database is linked. Copies can start at the same time and
+     each runs the migration as it starts, with no lock from Wathba, and
+     old and new copies overlap during a rollout: keep every migration
+     backward compatible and safe to run twice at once. Rollback and
+     take-down are the member's, on the hosting page;
      a rollback brings back the earlier app, not the database's data.
      Unlike the other sandbox services, hosting is not simulated: the app
      runs on real servers at a public address, free to the member, and is
