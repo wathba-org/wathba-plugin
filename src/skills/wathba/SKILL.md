@@ -202,7 +202,9 @@ exactly what to do, where and why, then end your turn.
      and Vite-style front ends, and serves a built static site; anything
      else needs a Dockerfile at the top of the zip that listens on 8080.
      Next.js, Flask, Django and own-Dockerfile builds are still in
-     preview: if one fails, read its build log with `get_deploy`.
+     preview: if one fails, `get_deploy` gives the failure reason, and the
+     member can copy the build log for you from the deploy on the hosting
+     page.
      Zip one app with its package.json, requirements.txt or Dockerfile at
      the top, never a monorepo. Turn it on with `open_flow` `enable`; then
      `execute_write_operation` `create_upload` (run the returned curl as
@@ -214,8 +216,9 @@ exactly what to do, where and why, then end your turn.
      goes in the database the member adds there (`DATABASE_URL`): the
      app's disk is wiped on every restart. Node, Bun and Next.js run
      migrations first in `"start"`, calling the tool by name (no npm or
-     npx); Django and Alembic migrate on their own once a database is
-     linked. Old and new copies overlap during a rollout, so keep each
+     npx); a Next.js app with `output: 'standalone'` never runs `"start"`,
+     so leave standalone out when it migrates; Django and Alembic migrate
+     on their own once a database is linked. Old and new copies overlap during a rollout, so keep each
      migration backward compatible and use the framework's migration
      lock. Rollback and take-down are the member's, on the hosting page;
      a rollback brings back the earlier app, not the database's data.
