@@ -195,6 +195,25 @@ exactly what to do, where and why, then end your turn.
      call's transcript is `execute_read_operation` with `operationCode`
      `get_call` and `input` `{"callId": "acl_..."}`.
    <!-- /dev-only -->
+   <!-- dev-only: hosting exists only in DEV sandboxes -->
+   - Hosting (`hosting.web`, only where `get_service` lists it): Wathba puts
+     the app online. It builds Node, Bun, Next.js, FastAPI, Flask, Django
+     and Vite-style front ends, and serves a built static site; anything
+     else needs a Dockerfile at the top of the zip that listens on 8080.
+     Zip one app with its package.json, requirements.txt or Dockerfile at
+     the top, never a monorepo. Turn it on with `open_flow` `enable`; then
+     `execute_write_operation` `create_upload` (run the returned curl as
+     given), `start_deploy` with `uploadId` and a one-line `description`,
+     and follow it with `execute_read_operation` `get_deploy`. A login app
+     gets its secret with `generate_secret` `{"name": "SESSION_SECRET"}`
+     before the first deploy; never put a secret in code, a file or this
+     chat. Keys the member owns go in the hosting page's Variables. Data
+     goes in the database the member adds there (`DATABASE_URL`): the
+     app's disk is wiped on every restart. Node, Bun and Next.js run
+     migrations first in `"start"`, calling the tool by name (no npm or
+     npx); Django and Alembic migrate on their own once a database is
+     linked. Rollback and take-down are the member's, on the hosting page.
+   <!-- /dev-only -->
 5. For each service the app needs, call `get_service_integration_docs` once,
    with the `integrationDocs` arguments a result gives for it, setting
    `language` to `ar` for an Arabic-speaking member and `en` otherwise. Docs
