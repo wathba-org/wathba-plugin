@@ -190,12 +190,17 @@ or every Wathba tool appears twice.
 /**
  * Parts of the skill for features only DEV has (AI calls today) sit between
  * `<!-- dev-only... -->` and `<!-- /dev-only -->` lines: DEV keeps the text
- * without the markers, prod drops the whole block.
+ * without the markers, prod drops the whole block. The skill's description
+ * is DEV's; prod's is `skill.prodDescription`.
  */
 const DEV_ONLY_BLOCK = /^[ \t]*<!-- dev-only[^\n]*-->\n([\s\S]*?)^[ \t]*<!-- \/dev-only -->\n/gm;
+const DESCRIPTION_LINE = /^description: .*$/m;
 
-function skillFor(skill, targetName) {
-  return skill.replace(DEV_ONLY_BLOCK, (_, body) => (targetName === "prod" ? "" : body));
+function skillFor(skill, targetName, config) {
+  const body = skill.replace(DEV_ONLY_BLOCK, (_, block) => (targetName === "prod" ? "" : block));
+  return targetName === "prod"
+    ? body.replace(DESCRIPTION_LINE, `description: ${JSON.stringify(config.skill.prodDescription)}`)
+    : body;
 }
 
 function buildFiles(config, sources, targetName, version) {
@@ -351,7 +356,7 @@ function buildFiles(config, sources, targetName, version) {
       mcpServers: { [target.serverKey]: { type: "http", url: mcpUrl } },
     }),
   );
-  files.set(`${pluginDir}/skills/${SKILL_NAME}/SKILL.md`, skillFor(sources.skill, targetName));
+  files.set(`${pluginDir}/skills/${SKILL_NAME}/SKILL.md`, skillFor(sources.skill, targetName, config));
   files.set(`${pluginDir}/assets/wathba-icon-light.png`, sources.icons[targetName].light);
   files.set(`${pluginDir}/assets/wathba-icon-dark.png`, sources.icons[targetName].dark);
   files.set(
@@ -509,6 +514,7 @@ function validate(config, targetName, files, version) {
   const descriptionLine = /^description:\s*"?(.+?)"?\s*$/m.exec(frontmatter[1]);
   if (!descriptionLine || descriptionLine[1].length > 1024)
     fail("skill", "skill description is missing or over 1024 characters");
+  if (!DESCRIPTION_LINE.test(skill)) fail("skill", "SKILL.md lacks a description line");
   const declared = new Set(config.skill.tools);
   const allowed = new Set([...declared, ...config.skill.nonToolTerms]);
   for (const [, token] of skill.matchAll(/`([a-z][a-z0-9]*(?:_[a-z0-9]+)+)`/g))

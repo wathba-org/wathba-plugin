@@ -74,8 +74,10 @@ they already told you as `prefill` (for example `name`, `appName`,
   Never call a card's own commands yourself.
 - `form_done`: the member answered the form their app showed them (Claude
   Code shows forms). Continue from the result; don't ask the same questions
-  again in the chat. `declined` means they closed it and nothing changed:
-  ask what they want.
+  again in the chat. `declined` means the form was closed or your app could
+  not show it, and nothing changed: never say the member closed it. If the
+  result gives a `link`, send it as the way to finish the same step on
+  Wathba's page; otherwise ask what they want.
 - `open_link`: this app shows neither cards nor forms (Codex CLI and other
   apps). Send the member the `link` as is, in one short message: a Wathba
   page (`/agent/flow/<flowId>`) where they finish the same card, signed in.
@@ -236,7 +238,10 @@ exactly what to do, where and why, then end your turn.
    swapping `WATHBA_API_KEY` for the Live key. On member API 2026-10-18 or
    later (`/v1/ex` paths) the app's code and paths stay the same; if a Live
    binding is pinned to an older version, run `inspect_api_upgrade` before
-   going live.
+   going live. When you start a server, database container or watcher to
+   test, stop only what you started, by its process id or container name,
+   never by a name pattern (`pkill -f`, `killall`): the member's other
+   programs run on the same computer.
 8. API upgrades (`inspect_api_upgrade`, `preview_api_upgrade`,
    `prepare_api_upgrade`, `apply_api_upgrade`, `rollback_api_upgrade`) may
    change production only after the member confirms the exact prepared plan
