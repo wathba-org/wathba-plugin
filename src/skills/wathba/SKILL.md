@@ -121,7 +121,9 @@ each marked done, next or to do, with who does it:
    sandbox key wherever the app runs.
 <!-- dev-only: hosting exists only in DEV sandboxes -->
 When the app uses no Wathba service besides hosting, it needs no key: skip
-steps 3 and 6, and step 5 is the hosting deploy below.
+steps 3 and 6. The hosted address is a temporary sandbox preview, taken
+down a few days after its last deploy, and is not the production deploy
+going live needs.
 <!-- /dev-only -->
 
 Mark a step done only when a Wathba result or your own test shows it:
@@ -205,43 +207,20 @@ exactly what to do, where and why, then end your turn.
      `get_call` and `input` `{"callId": "acl_..."}`.
    <!-- /dev-only -->
    <!-- dev-only: hosting exists only in DEV sandboxes -->
-   - Hosting (`hosting.web`, only where `list_project_services` lists it;
-     `get_service` `hosting.web` has its state and plans): Wathba puts the
-     app online. It builds Node, Bun, Next.js, FastAPI, Flask, Django
-     and Vite-style front ends, and serves a built static site; anything
-     else needs a Dockerfile at the top of the zip that listens on 8080.
-     Next.js, Flask, Django and own-Dockerfile builds are still in
-     preview: if one fails, `get_deploy` gives the failure reason, and the
-     member can copy the build log for you from that deploy's page (the
-     `deployUrl` the answer gives).
-     Zip one app with its package.json, requirements.txt or Dockerfile at
-     the top, never a monorepo. Turn it on with `open_flow` `enable`; then
-     `execute_write_operation` `create_upload` (run the returned curl as
-     given), `start_deploy` with `uploadId` and a one-line `description`,
-     and follow it with `execute_read_operation` `get_deploy`. A login app
-     gets its secret with `generate_secret` `{"name": "SESSION_SECRET"}`
-     before the first deploy; never put a secret in code, a file or this
-     chat. Hand the member the hosting page as the `consoleUrl` an answer
-     gives, never a link you build. Keys the member owns go in its
-     Variables. Data
-     goes in the database the member adds there (`DATABASE_URL`): the
-     app's disk is wiped on every restart. Node, Bun and Next.js run
-     migrations first in `"start"`, calling the tool by name (a start
-     that calls npm, npx, yarn, pnpm or corepack is refused at upload).
-     A Next.js app with `output: 'standalone'` never runs `"start"`, and
-     a start that does more than `next start` is refused there, so leave
-     standalone out when it migrates. Django and Alembic migrate on their
-     own once a database is linked. Copies can start at the same time and
-     each runs the migration as it starts, with no lock from Wathba, and
-     old and new copies overlap during a rollout: keep every migration
-     backward compatible and safe to run twice at once. Rollback and
-     take-down are the member's, on the hosting page;
-     a rollback brings back the earlier app, not the database's data.
-     Unlike the other sandbox services, hosting is not simulated: the app
-     runs on real servers at a public address, free to the member, and is
-     taken down a few days after its last deploy went live (`get_service`
-     `hosting.web` gives the time). Say so with that time; never call it
-     a simulation.
+   - Hosting (`hosting.web`, only where `list_project_services` lists it):
+     Wathba puts the app online from a zip you upload. If that row says
+     its state could not be read right now, call `list_project_services`
+     again in a moment; don't tell the member hosting isn't offered. Turn it on with
+     `open_flow` `enable`; `get_service` `hosting.web` has its state, plans
+     and how long a site stays up, and `get_service_integration_docs` has
+     the stacks, the upload and deploy steps, secrets, data and
+     migrations: follow them. Hand the member the hosting page as the
+     `consoleUrl` an answer gives, never a link you build. Unlike the other
+     sandbox services, hosting is not simulated: the app runs on real
+     servers at a public address, free to the member, and is taken down a
+     few days after its last deploy went live. Say so with the time
+     `get_service` gives; never call it a simulation, and never present
+     it as the app's production home.
    <!-- /dev-only -->
 5. For each service the app needs, call `get_service_integration_docs` once,
    with the `integrationDocs` arguments a result gives for it, setting
