@@ -20,9 +20,10 @@ link to its file.
   are missing, or a call reports an authorization problem, ask the member to
   reconnect or sign in to Wathba in this app.
 - Never ask for, accept or print an API key, token or password, and never put
-  credentials in chat, files or logs. Codes Wathba sends the member (a live
-  test, a domain purchase, the Wathba Pay terms) are typed by the member into
-  Wathba's own card, form or page, never into this chat.
+  credentials in chat, files or logs. A code Wathba sends the member (a live
+  test, a domain purchase, the Wathba Pay terms) goes into Wathba's own card,
+  form or page; ask for it in the chat only when an `ask_member` result asks
+  for it, and pass it on once, unchanged.
 - If a Wathba API key was exposed (pasted in the chat, committed, logged or
   shared), never repeat it. Tell the member at once, then `open_flow` with
   flow `api_key` for its environment so they revoke it (apps using it stop at
