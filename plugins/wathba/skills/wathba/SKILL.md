@@ -62,7 +62,7 @@ doesn't exist.
 
 ## How `open_flow` reaches the member
 
-You never fill a flow in for the member and never answer their form. Pass what
+You never fill a flow in for the member and never answer for them. Pass what
 they already told you as `prefill` (for example `name`, `appName`,
 `website`). The result's `outcome` says what happened:
 
@@ -76,11 +76,16 @@ they already told you as `prefill` (for example `name`, `appName`,
   Code shows forms). Continue from the result; don't ask the same questions
   again in the chat. `declined` means they closed it and nothing changed:
   ask what they want.
-- `open_link`: this app shows neither cards nor forms (Codex CLI and other
-  apps). Send the member the `link` as is, in one short message: a Wathba
-  page (`/agent/flow/<flowId>`) where they finish the same card, signed in.
-  End your turn; when they say they're done, check with `get_service` or
-  `nextStep`.
+- `ask_member`: Wathba can't show its form in this app, so you ask. Put the
+  result's `question` and each of its `fields` to the member in the chat, in
+  their language, and end your turn. When they answer, call `nextStep` adding
+  `answers`: their own words, keyed as in `fields`. Never answer a field
+  yourself or guess one. If they say no, stop: nothing changed.
+- `open_link`: a step only the member can do on their signed-in Wathba page
+  (approving, paying, signing, a new key), or one this app can't ask about.
+  Send the member the `link` as is, in one short message: a Wathba page
+  (`/agent/flow/<flowId>`) where they finish it. End your turn; when they say
+  they're done, check with `get_service` or `nextStep`.
 - `verify_on_page`: only the signed-in member can do this step on Wathba's
   page. Send them the `link` and wait.
 - `waiting`: the step takes longer (a website check, a partner review, a
