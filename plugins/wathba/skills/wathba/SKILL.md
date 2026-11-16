@@ -206,7 +206,13 @@ exactly what to do, where and why, then end your turn.
    code could not be confirmed and hides the code field (no earlier code
    verifies either); in Live, Wathba refuses a new code to that recipient
    until the code validity plus about 90 seconds have passed.
-   For Wathba Pay, also give the member a way to refund customers: a Refund
+   For Wathba Pay, the customer is charged when they pay: leave
+   `captureMethod` out of the Payment Intent. Set it to `manual` only when
+   the member asks to hold a payment and capture or release it later (for
+   example, charge when an order ships), and only if the service's docs
+   describe manual capture; the app's server then captures or releases each
+   hold before its deadline, as the docs say.
+   Also give the member a way to refund customers: a Refund
    button on succeeded payments in the app's admin panel or backoffice,
    behind its admin login, that calls the refund endpoint from the app's
    server with `WATHBA_API_KEY`. A refund needs no member approval. If the
