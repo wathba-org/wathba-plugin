@@ -66,39 +66,39 @@ the member approves it on the Wathba consent page.
 
 | Tool | Reads or writes | Effect |
 |---|---|---|
-| `list_notices` | Read | The member's actionable notices across projects |
-| `list_projects` | Read | The member's projects and environment readiness; where the member allowed it, their own wallet balance (read-only) |
-| `get_project_setup` | Read | Sandbox, production, portal and key-management guidance (no credentials) |
-| `list_project_services` | Read | Services in the project and on offer, 20 a page, searchable |
-| `get_service` | Read | One service: its state in each environment, operations, flows, requirements and next step |
-| `get_service_integration_docs` | Read | A service's docs for its API version: runtime, operations, limits and troubleshooting |
-| `recommend_services_for_repository` | Read | Recommendations from a bounded repository profile built locally; no source code is sent |
-| `create_project` | Write | Creates one sandbox project (idempotent) |
-| `open_flow` | Member step | Opens one step the member completes: a new project, API keys, webhooks, a wallet top-up, a .sa domain search or purchase, turning a service on, an Authentica live test, approving a Live operation. Shown as a Wathba card, the host's own form, or a link to one signed-in Wathba page (`/agent/flow/<flowId>`) |
-| `execute_read_operation` | Read | Runs one read operation of a service in the project; the sandbox by default |
-| `execute_write_operation` | Write | Runs one write operation in the sandbox (simulated, free); in Live it runs only after the member approves it on their signed-in Wathba page |
-| `get_domain_dns_records` | Read | A registered domain's DNS records and name servers |
-| `change_domain_dns_record` | Write | Adds, updates or deletes one DNS record the member asked for |
-| `change_domain_nameservers` | Write | Replaces a domain's name servers |
-| `report_issue` | Write | Sends a problem report to Wathba's team, only after the member confirms it |
-| `inspect_api_upgrade` | Read | Pinned version and supported contracts |
-| `preview_api_upgrade` | Write | Records sandbox contract evidence |
-| `prepare_api_upgrade` | Write | A short-lived upgrade plan bound to tested releases |
-| `apply_api_upgrade` | Write | Changes the API version pin, including production, only after the member confirms the exact plan in the conversation |
-| `rollback_api_upgrade` | Write | Restores the previous API version pin |
+| `list_wathba_notices` | Read | The member's actionable notices across projects |
+| `list_wathba_projects` | Read | The member's projects and environment readiness; where the member allowed it, their own wallet balance (read-only) |
+| `get_wathba_project_setup` | Read | Sandbox, production, portal and key-management guidance (no credentials) |
+| `list_wathba_project_services` | Read | Services in the project and on offer, 20 a page, searchable |
+| `get_wathba_service` | Read | One service: its state in each environment, operations, flows, requirements and next step |
+| `get_wathba_service_integration_docs` | Read | A service's docs for its API version: runtime, operations, limits and troubleshooting |
+| `recommend_wathba_services_for_repository` | Read | Recommendations from a bounded repository profile built locally; no source code is sent |
+| `create_wathba_project` | Write | Creates one sandbox project (idempotent) |
+| `open_wathba_flow` | Member step | Opens one step the member completes: a new project, API keys, webhooks, a wallet top-up, a .sa domain search or purchase, turning a service on, an Authentica live test, approving a Live operation. Shown as a Wathba card, the host's own form, or a link to one signed-in Wathba page (`/agent/flow/<flowId>`) |
+| `execute_wathba_read_operation` | Read | Runs one read operation of a service in the project; the sandbox by default |
+| `execute_wathba_write_operation` | Write | Runs one write operation in the sandbox (simulated, free); in Live it runs only after the member approves it on their signed-in Wathba page |
+| `get_wathba_domain_dns_records` | Read | A registered domain's DNS records and name servers |
+| `change_wathba_domain_dns_record` | Write | Adds, updates or deletes one DNS record the member asked for |
+| `change_wathba_domain_nameservers` | Write | Replaces a domain's name servers |
+| `report_wathba_issue` | Write | Sends a problem report to Wathba's team, only after the member confirms it |
+| `inspect_wathba_api_upgrade` | Read | Pinned version and supported contracts |
+| `preview_wathba_api_upgrade` | Write | Records sandbox contract evidence |
+| `prepare_wathba_api_upgrade` | Write | A short-lived upgrade plan bound to tested releases |
+| `apply_wathba_api_upgrade` | Write | Changes the API version pin, including production, only after the member confirms the exact plan in the conversation |
+| `rollback_wathba_api_upgrade` | Write | Restores the previous API version pin |
 
 Wathba's cards call a few more tools themselves, hidden from the model, to act
 on what the member confirms inside the card. API keys and signing secrets are
 shown to the member, never returned to the model, and approving a Live
 operation happens only on the member's signed-in Wathba page. The tools never
 fund the wallet, accept provider terms or deploy on their own. Where the
-member allowed it on the consent page, `list_projects` can show them their own
+member allowed it on the consent page, `list_wathba_projects` can show them their own
 wallet balance, read-only.
 
 ## Data handling
 
 - Tool results carry project and integration facts only; a recursive output
   guard blocks credential-shaped values.
-- `recommend_services_for_repository` accepts a bounded profile and rejects
+- `recommend_wathba_services_for_repository` accepts a bounded profile and rejects
   source code, file contents, environment values and credentials.
 - OAuth tokens stay in the agent host, outside the model context.
