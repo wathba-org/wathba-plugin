@@ -41,6 +41,9 @@ jobs:
       - name: Install the host CLIs used as validators
         run: npm install --global --no-fund --no-audit "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" "@openai/codex@${CODEX_VERSION}"
 
+      - name: Unit tests for the generator rules
+        run: node --test scripts/*.test.mjs
+
       - name: Generator rules (both targets, committed root output)
         run: node scripts/sync.mjs check
 
