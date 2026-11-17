@@ -58,6 +58,7 @@
     "nonToolTerms": [
       "api_key",
       "approval_required",
+      "ask_member",
       "authorization_required",
       "card_opened",
       "domain_purchase",
