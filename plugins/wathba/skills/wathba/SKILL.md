@@ -206,20 +206,32 @@ exactly what to do, where and why, then end your turn.
    code could not be confirmed and hides the code field (no earlier code
    verifies either); in Live, Wathba refuses a new code to that recipient
    until the code validity plus about 90 seconds have passed.
-   For Wathba Pay, the customer is charged when they pay: leave
-   `captureMethod` out of the Payment Intent. Set it to `manual` only when
-   the member asks to hold a payment and capture or release it later (for
-   example, charge when an order ships), and only if the service's docs
-   describe manual capture; the app's server then captures or releases each
-   hold before its deadline, as the docs say.
-   Also give the member a way to refund customers: a Refund
-   button on succeeded payments in the app's admin panel or backoffice,
-   behind its admin login, that calls the refund endpoint from the app's
-   server with `WATHBA_API_KEY`. A refund needs no member approval. If the
-   app has no admin panel, tell the member why they need one (customers ask
-   for refunds, and someone has to check payments) and offer to build a
-   minimal one: a payments list with a Refund button. The docs'
-   records-and-refunds article has the details.
+   For Wathba Pay, hold each payment first by default: if the service's
+   docs describe manual capture, set `captureMethod` to `manual` in the
+   Payment Intent. The customer's card is then only authorized, and the
+   app's server captures the payment (all or part) when the order is
+   fulfilled, or releases it when the order is cancelled. When you set this
+   up, tell the member why, in their language: Moyasar recommends
+   authorizing first and then capturing or releasing, because releasing a
+   hold costs no fee and returns the money to the card at once, while
+   refunding a payment that was already charged costs Moyasar's fees. Also
+   tell them that every hold has a two-week window: it must be captured or
+   released within 14 days of the payment, or it lapses and nothing is
+   collected. Holds work with cards, Apple Pay and Samsung Pay, not STC Pay.
+   Leave `captureMethod` out, so the customer is charged at once, only if
+   the docs don't describe manual capture, the member wants STC Pay, or the
+   member chooses to charge at once (for example, an instant digital
+   download).
+   Also give the member a way to capture and release held payments and to
+   refund customers: Capture and Release buttons on held payments and a
+   Refund button on succeeded payments in the app's admin panel or backoffice,
+   behind its admin login, that call the capture, release and refund
+   endpoints from the app's server with `WATHBA_API_KEY`. A refund needs no
+   member approval. If the app has no admin panel, tell the member why they
+   need one (holds must be captured within two weeks, customers ask for
+   refunds, and someone has to check payments) and offer to build a minimal
+   one: a payments list with these buttons. The docs' manual-capture and
+   records-and-refunds articles have the details.
 6. The member's app makes its own API calls with its key; you never put a
    Wathba tool call in the app. To try an operation yourself, use
    `execute_read_operation` or `execute_write_operation` (`get_service`
