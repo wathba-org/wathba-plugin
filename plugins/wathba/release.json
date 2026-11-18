@@ -7,5 +7,5 @@
   "mcpEndpoint": "https://api.wathba.sa/mcp",
   "portalOrigin": "https://platform.wathba.sa",
   "credentialMode": "oauth_pkce",
-  "contentDigest": "sha256:f7dcc9ac2f83d0b3aaff67058497ab05efd6abc7e10a1e60b16fed68c60eeab5"
+  "contentDigest": "sha256:0ec5a3e48ad8b29dbb20d6fa96f4f4bcbef94b3803ec266e8a535f3e5b6ef979"
 }

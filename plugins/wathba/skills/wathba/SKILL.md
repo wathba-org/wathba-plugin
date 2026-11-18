@@ -63,8 +63,8 @@ Always name the environment: the exact `environmentId`, or `environmentKind`
   is on screen and shows where the step stands. Point the member to it in one
   short sentence, then end your turn. You hear when they're done or would
   rather not: the card posts a short message in their name, or they tell
-  you. Then check with the result's `nextStep`, or `get_wathba_service` when
-  it has none. Never call a card's own commands. If no card appeared, or this
+  you. Then check with the result's `nextStep`, or as step 5 says when it
+  has none. Never call a card's own commands. If no card appeared, or this
   app can't show cards, call `open_wathba_flow` again with the `flowId` and
   `answers: {}` to go on in the chat.
 - `ask_member`: Wathba can't show its form here, so you ask. Put the result's
