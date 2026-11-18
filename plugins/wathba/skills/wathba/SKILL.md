@@ -28,9 +28,7 @@ Wathba lists one fixed set of tools, the same for every service: a new
 service, flow or operation is new data in their results, never a new tool. An
 app connected before Wathba renamed its tools lists them without `wathba`
 (`get_service` for `get_wathba_service`): use the names your list shows, and
-never call a tool that isn't listed. When a tool takes an `intent`, pass the
-member's request in one short English sentence, with no names, emails, phone
-numbers or secrets.
+never call a tool that isn't listed.
 
 1. Start each Wathba task with `list_wathba_notices`, then
    `list_wathba_projects`, and follow its first page's `guidance`: Wathba's
@@ -63,11 +61,11 @@ Always name the environment: the exact `environmentId`, or `environmentKind`
 
 - `card_opened`, `card`, `form`, `search` or `purchase_form`: a Wathba card
   is on screen and shows where the step stands. Point the member to it in one
-  short sentence, then end your turn. If it asks them for something, you hear
-  when they're done: the card posts a short message in their name, or they
-  tell you. Then check with `get_wathba_service` or the result's `nextStep`.
-  Never call a card's own commands. If no card appeared, or this app can't
-  show cards, call `open_wathba_flow` again with the `flowId` and
+  short sentence, then end your turn. You hear when they're done or would
+  rather not: the card posts a short message in their name, or they tell
+  you. Then check with the result's `nextStep`, or `get_wathba_service` when
+  it has none. Never call a card's own commands. If no card appeared, or this
+  app can't show cards, call `open_wathba_flow` again with the `flowId` and
   `answers: {}` to go on in the chat.
 - `ask_member`: Wathba can't show its form here, so you ask. Put the result's
   `question` and each of its `fields` to the member in the chat, in their
@@ -81,9 +79,12 @@ Always name the environment: the exact `environmentId`, or `environmentKind`
   your turn; when they say they're done, check with `nextStep`.
 - `waiting`: a partner or a check is working, and the member has nothing to
   do now. Open the flow again with its `flowId`, as its `nextStep` shows, no
-  sooner than `retryAfterSeconds`, or when a notice says it moved.
-- `done`: the flow is finished. `declined`: they said no and nothing
-  changed; ask what they want.
+  sooner than `retryAfterSeconds`, or when a notice says it moved. Call a
+  result's `backStep` or `retryStep` only when the member asks to go back or
+  to try again.
+- `done`: the flow is finished. `declined`: they said no. Tell them what
+  the result says, ask what they want instead, and never ask again by
+  yourself.
 - Any other outcome (for example `created`, `blocked` or `not_available`)
   says what happened: follow the result's `summary` and `nextStep`, send the
   member any link it gives, and don't ask again what a form already asked.
