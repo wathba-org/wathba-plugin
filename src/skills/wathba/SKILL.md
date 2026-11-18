@@ -211,8 +211,9 @@ exactly what to do, where and why, then end your turn.
      Wathba's Torod account; the member has no Torod account, password or
      wallet. `open_wathba_flow` `enable` with `serviceCode` `shipping.torod`:
      the member confirms a store name and the app's website (pass what they
-     told you as `prefill`), Wathba creates the store, then the member adds a
-     pickup address on the Wathba page the flow opens.
+     told you as `prefill` `suggestedName` and `website`), Wathba creates the
+     store, then the member adds a pickup address on the Wathba page the flow
+     opens.
    <!-- /dev-only -->
 5. For each service the app needs, call `get_wathba_service_integration_docs` once,
    with the `integrationDocs` arguments a result gives for it, setting
