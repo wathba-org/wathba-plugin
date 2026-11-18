@@ -154,15 +154,24 @@ describe("service codes", () => {
     passes(skill(`${allowed}\n`));
   });
 
-  test("lets a file name through, and a field path only when the config lists it", () => {
-    assert.deepEqual(serviceCodesIn("Read `package.json` and `tsconfig.build.json` for the stack."), []);
-    assert.deepEqual(serviceCodesIn("Read `playbook.body`."), ["playbook.body"]);
-    assert.deepEqual(serviceCodesIn("Read `playbook.body`.", ["playbook.body"]), []);
-    // Listing one path lets no service code through.
-    assert.deepEqual(serviceCodesIn("Read `playbook.body` of payments.moyasar.", ["playbook.body"]), [
-      "payments.moyasar",
-    ]);
-    // A code is still a code when its last part looks like nothing on the list.
+  test("lets a known app file and a path into a Wathba result through, and nothing else", () => {
+    assert.deepEqual(serviceCodesIn("Read `package.json` and `tsconfig.json` for the stack."), []);
+    assert.deepEqual(serviceCodesIn("Read `playbook.body` and `result.outcome`."), []);
+    passes(skill("Read `package.json`, then `playbook.body`.\n"));
+    // A code whose last part looks like a file extension is still a code.
+    for (const code of ["domains.sh", "domains.md", "storage.json", "payments.go"]) {
+      assert.deepEqual(serviceCodesIn(`Turn on ${code}.`), [code]);
+      fails(skill(`Turn on ${code}.\n`), /has the shape of a service code/);
+    }
+    // No list in the config lets one through.
+    assert.deepEqual(serviceCodesIn("Read `playbook.body` of payments.moyasar."), ["payments.moyasar"]);
+    const listed = {
+      skill: { ...config.skill, fieldPaths: ["payments.moyasar"], fileNames: ["payments.moyasar"] },
+    };
+    assert.throws(
+      () => checkSkill(skill("Turn on payments.moyasar.\n"), listed, "prod"),
+      (error) => error instanceof RuleError && /names payments\.moyasar,/.test(error.message),
+    );
     assert.deepEqual(serviceCodesIn("Turn on calls.ai."), ["calls.ai"]);
   });
 

@@ -212,24 +212,22 @@ export function skillFor(skill, targetName) {
   return skill.replace(DEV_ONLY_BLOCK, (_, body) => (targetName === "prod" ? "" : body));
 }
 
-// A dotted name whose last part is one of these is a file name, not a code.
-const FILE_EXTENSIONS = new Set([
-  "cjs", "css", "env", "go", "html", "java", "js", "json", "jsx", "lock", "md",
-  "mjs", "php", "py", "rb", "sh", "sql", "toml", "ts", "tsx", "txt", "yaml", "yml",
+// Dotted names the skill may use that have a service code's shape: the app
+// files an agent reads to learn the stack, and paths into the fields of a
+// Wathba result. Both lists are closed on purpose: a list in the config, or
+// "anything ending in a file extension", would let a service code through
+// (domains.sh, or payments.moyasar added to an allowlist).
+const APP_FILE_NAMES = new Set([
+  "composer.json", "package.json", "pyproject.toml", "requirements.txt", "tsconfig.json",
 ]);
+const RESULT_FIELD_ROOTS = new Set(["guidance", "notices", "operation", "playbook", "result"]);
 
-/**
- * Every service-code-shaped name in a text, in order. A file name
- * (`package.json`) is none, and neither is a field path the config lists in
- * `skill.fieldPaths` (`playbook.body`): a lowercase field path has a code's
- * shape, so each one the skill needs is named there on purpose.
- */
-export function serviceCodesIn(text, fieldPaths = []) {
-  const listed = new Set(fieldPaths);
+/** Every service-code-shaped name in a text, in order. */
+export function serviceCodesIn(text) {
   return [...text.matchAll(SERVICE_CODE_SHAPE)]
     .map(([match]) => match)
     .filter((match) => match.split(".").every((part) => part.length >= 2))
-    .filter((match) => !listed.has(match) && !FILE_EXTENSIONS.has(match.split(".").at(-1)));
+    .filter((match) => !APP_FILE_NAMES.has(match) && !RESULT_FIELD_ROOTS.has(match.split(".")[0]));
 }
 
 /**
@@ -252,13 +250,12 @@ export function checkSkill(skill, config, targetName) {
   const descriptionLine = /^description:\s*"?(.+?)"?\s*$/m.exec(frontmatter[1]);
   if (!descriptionLine || descriptionLine[1].length > 1024)
     fail("skill", "skill description is missing or over 1024 characters");
-  const [code] = serviceCodesIn(skill, config.skill.fieldPaths ?? []);
+  const [code] = serviceCodesIn(skill);
   if (code)
     fail(
       "skill",
       `SKILL.md names ${code}, which has the shape of a service code: the skill names no ` +
-        "service (an agent reads each one from get_wathba_service); write a URL with its scheme, " +
-        "and list a field path the skill needs in skill.fieldPaths",
+        "service (an agent reads each one from get_wathba_service); write a URL with its scheme",
     );
   const declared = new Set(config.skill.tools);
   const allowed = new Set([...declared, ...config.skill.nonToolTerms]);

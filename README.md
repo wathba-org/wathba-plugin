@@ -73,9 +73,10 @@ the go-live checklist and the language rule. `check` holds it to that:
 - The built `SKILL.md` is at most 8,000 bytes (UTF-8, so Arabic counts double).
 - It names no service code: no lowercase dotted name such as
   `payments.moyasar`. Write a URL with its scheme; a bare host name looks like
-  a code and fails. A file name such as `package.json` passes. A lowercase
-  field path such as `playbook.body` has a code's shape, so list each one the
-  skill needs in `skill.fieldPaths` in `plugin.config.json`.
+  a code and fails. Two closed lists in `scripts/sync.mjs` pass: the app files
+  an agent reads to learn the stack (`package.json` and a few more) and paths
+  into a Wathba result's fields (`playbook.body`, `result.outcome`). Nothing
+  in `plugin.config.json` can let a code through.
 - It names only the tools in `skill.tools`, plus the other snake_case terms
   in `skill.nonToolTerms` (outcomes, flows, older tool names).
 

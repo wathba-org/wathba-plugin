@@ -60,14 +60,15 @@ Always name the environment: the exact `environmentId`, or `environmentKind`
 `flowId`: pass it to continue that flow instead of starting a new one. The
 `outcome` says what happened:
 
-- A result with a `widget` (its `outcome` is `card_opened`, `card`, `form`,
-  `search` or `purchase_form`): a Wathba card is on screen. Point the member
-  to it in one short sentence, then end your turn. You hear when they're
-  done: the card posts a short message in their name, or they tell you. Then
-  check with `get_wathba_service` or the result's `nextStep`. Never call a
-  card's own commands. If no card appeared, or this app can't show cards,
-  call `open_wathba_flow` again with the `flowId` and `answers: {}` to go on
-  in the chat.
+- `card_opened`, `card`, `form`, `search` or `purchase_form`: a Wathba card
+  is on screen and shows where the step stands. Point the member to it in one
+  short sentence, then end your turn. If it asks them for something, you hear
+  when they're done: the card posts a short message in their name, or they
+  tell you. Then check with `get_wathba_service` or the result's `nextStep`.
+  Never call a card's own commands. If no card appeared, or this app can't
+  show cards, call `open_wathba_flow` again with the `flowId` and
+  `answers: {}` to go on in the chat. Any other outcome means what it says
+  below, whether or not a card is also on screen.
 - A result that says what happened after the member's app showed them a form
   (for example `created` or `enabled`): they answered it. Continue from the
   result; don't ask the same questions again. `declined` means they said no
@@ -76,7 +77,8 @@ Always name the environment: the exact `environmentId`, or `environmentKind`
   `question` and each of its `fields` to the member in the chat, in their
   language, and end your turn. When they answer, call `nextStep` adding
   `answers`: their own words, keyed as in `fields`. Never answer or guess a
-  field. If they say no, stop: nothing changed.
+  field. A no is an answer too: send it (`confirm: false` for a yes or no
+  question), then follow the result.
 - `open_link` or `verify_on_page`: a step only the member can do on their
   signed-in Wathba page. Send the `link` as is, in one short message, and end
   your turn; when they say they're done, check with `nextStep`.
