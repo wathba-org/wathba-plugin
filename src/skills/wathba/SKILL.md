@@ -206,6 +206,14 @@ exactly what to do, where and why, then end your turn.
      call's transcript is `execute_wathba_read_operation` with `operationCode`
      `get_call` and `input` `{"callId": "acl_..."}`.
    <!-- /dev-only -->
+   <!-- dev-only: Torod shipping exists only in DEV -->
+   - Torod shipping (`shipping.torod`): each project gets its own store under
+     Wathba's Torod account; the member has no Torod account, password or
+     wallet. `open_wathba_flow` `enable` with `serviceCode` `shipping.torod`:
+     the member confirms a store name and the app's website (pass what they
+     told you as `prefill`), Wathba creates the store, then the member adds a
+     pickup address on the Wathba page the flow opens.
+   <!-- /dev-only -->
 5. For each service the app needs, call `get_wathba_service_integration_docs` once,
    with the `integrationDocs` arguments a result gives for it, setting
    `language` to `ar` for an Arabic-speaking member and `en` otherwise. Docs
