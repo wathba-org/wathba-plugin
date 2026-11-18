@@ -113,6 +113,7 @@ describe("service codes", () => {
     "domains.souq-t2",
     "calls.ai",
     "shipping.torod",
+    "realestate.ejar",
   ];
 
   test("fails on every service code Wathba has today, quoted or bare", () => {

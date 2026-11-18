@@ -52,6 +52,7 @@
       "card_opened",
       "flow_not_available",
       "get_service",
+      "not_available",
       "open_link",
       "purchase_form",
       "report_wathba_issue",
