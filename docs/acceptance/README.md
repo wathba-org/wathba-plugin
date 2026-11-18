@@ -14,7 +14,7 @@ for anything that writes.
 |---|---|
 | Fresh install | Plugin listed with the right name and icon; skill listed; exactly one Wathba MCP server |
 | OAuth | Browser consent shows full access; the host stores the token; granted scopes are `mcp:read mcp:api-contracts:upgrade projects:create` |
-| Tool list | The host lists the fixed Wathba tools the skill names (20, or 19 while `report_wathba_issue` is off) and none of the old `open_*` card tools |
+| Tool list | The host lists Wathba's fixed tools (20, or 19 while `report_wathba_issue` is off), every tool in `contract.json` among them, and none of the old `open_*` card tools |
 | Read | `list_wathba_notices`, `list_wathba_projects`, `list_wathba_project_services`, `get_wathba_service`, `get_wathba_service_integration_docs` each return a tool result, not only a transport success |
 | Create project | `create_wathba_project`, or `open_wathba_flow` with flow `create_project`, creates exactly one sandbox project |
 | Replay | The same `idempotencyKey` returns the same project and creates no duplicate |

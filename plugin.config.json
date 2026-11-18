@@ -35,45 +35,28 @@
   "skill": {
     "source": "src/skills/wathba/SKILL.md",
     "tools": [
-      "apply_wathba_api_upgrade",
-      "change_wathba_domain_dns_record",
-      "change_wathba_domain_nameservers",
-      "create_wathba_project",
       "execute_wathba_read_operation",
       "execute_wathba_write_operation",
-      "get_wathba_domain_dns_records",
       "get_wathba_project_setup",
       "get_wathba_service",
       "get_wathba_service_integration_docs",
-      "inspect_wathba_api_upgrade",
       "list_wathba_notices",
       "list_wathba_project_services",
       "list_wathba_projects",
       "open_wathba_flow",
-      "prepare_wathba_api_upgrade",
-      "preview_wathba_api_upgrade",
-      "recommend_wathba_services_for_repository",
-      "rollback_wathba_api_upgrade"
+      "recommend_wathba_services_for_repository"
     ],
     "nonToolTerms": [
       "api_key",
-      "approval_required",
       "ask_member",
-      "authorization_required",
       "card_opened",
-      "create_project",
-      "domain_purchase",
-      "domain_search",
       "flow_not_available",
-      "form_done",
-      "get_call",
-      "invalid_input",
-      "live_test",
+      "get_service",
+      "not_available",
       "open_link",
+      "purchase_form",
       "report_wathba_issue",
-      "tools_changed",
-      "verify_on_page",
-      "wallet_top_up"
+      "verify_on_page"
     ]
   },
   "claude": {

@@ -56,8 +56,29 @@ edited by hand. They are generated from two sources:
 
 `scripts/sync.mjs` builds one marketplace per environment and enforces the
 packaging rules: identities, paths, one MCP server per package with no headers
-or scopes, environment isolation, no credentials, the skill's tool list, and the
-icon hash.
+or scopes, environment isolation, no credentials, the skill's tool list, size
+and service codes, and the icon hash. `scripts/sync.test.mjs` unit tests the
+skill rules.
+
+### The skill is a router
+
+The skill never changes when Wathba adds a service, a flow, an operation or a
+rule for a service. The server serves all of that: each service's playbook,
+flows and operations in `get_wathba_service`, its code in its integration
+docs, and the cross-service rules in `list_wathba_projects`' first-page
+guidance. The skill keeps only what never changes: how to connect, how to
+route a task through those tools, what each `open_wathba_flow` outcome means,
+the go-live checklist and the language rule. `check` holds it to that:
+
+- The built `SKILL.md` is at most 8,000 bytes (UTF-8, so Arabic counts double).
+- It names no service code: no lowercase dotted name such as
+  `payments.moyasar`. Write a URL with its scheme; a bare host name looks like
+  a code and fails. Two closed lists in `scripts/sync.mjs` pass: the app files
+  an agent reads to learn the stack (`package.json` and a few more) and paths
+  into a Wathba result's fields (`playbook.body`, `result.outcome`). Nothing
+  in `plugin.config.json` can let a code through.
+- It names only the tools in `skill.tools`, plus the other snake_case terms
+  in `skill.nonToolTerms` (outcomes, flows, older tool names).
 
 | Workflow | When | What it does |
 |---|---|---|
@@ -75,7 +96,7 @@ that allows.
 Changes reach DEV first and production later, like the platform.
 
 1. Branch from `dev` and edit `plugin.config.json` or `src/`.
-2. Run `node scripts/sync.mjs check`.
+2. Run `node --test scripts/*.test.mjs` and `node scripts/sync.mjs check`.
 3. Open a pull request into `dev`. When it merges, `publish-dev` publishes
    it to DEV agents as `<version>-dev.<run>`. No version bump is needed here.
    The owner's review is required: it reaches DEV members' agents.
@@ -86,7 +107,8 @@ it and fails a backend change that would remove or rename one of them.
 ## Release production
 
 Promote once the matching Wathba platform release is in production, so the
-skill never names tools the production server doesn't serve yet.
+skill never relies on a tool or a field (such as a service's playbook) the
+production server doesn't serve yet.
 
 1. Open a pull request from `dev` into `main` that raises `version` in
    `plugin.config.json`. CI refuses a changed package with the same version,

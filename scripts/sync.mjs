@@ -10,13 +10,15 @@
 // `build` writes one complete marketplace tree. Writing into the repository
 // root replaces only the generated paths. `check` builds both targets in
 // memory, validates them, and (once config.rootTarget is set) requires the
-// committed root output to equal a fresh build.
+// committed root output to equal a fresh build. The rules are unit tested in
+// sync.test.mjs (`node --test scripts/*.test.mjs`).
 
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync } from "node:fs";
+import { existsSync, realpathSync } from "node:fs";
 import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join, relative, resolve, sep } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(import.meta.dirname, "..");
 const AGENT_PLUGIN_SCHEMA =
@@ -26,6 +28,18 @@ const AGENT_MCP_SCHEMA =
 const REGISTRY_SCHEMA =
   "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json";
 const SKILL_NAME = "wathba";
+// The skill is a router that never changes when Wathba adds a service: each
+// service's guidance comes from the server (get_wathba_service's playbook).
+// The cap keeps per-service text from creeping back in; it counts the built
+// SKILL.md in UTF-8 bytes, so Arabic counts double.
+export const SKILL_MAX_BYTES = 8000;
+// The shape of a service code (payments.moyasar, domains.souq-t2): lowercase
+// dotted words of at least two characters each, so "e.g." and "v1.2" pass. A
+// dot, slash, @, hyphen or word character next to it means a file name, path,
+// URL or e-mail address, which are allowed. A bare host name is refused like a
+// code: some codes end in a top-level domain (calls.ai).
+const SERVICE_CODE_SHAPE =
+  /(?<![\w./@-])[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*(?:\.[a-z0-9]+(?:[_-][a-z0-9]+)*)+(?![\w/@-]|\.[a-z0-9])/g;
 const NAME_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const SEMVER_PATTERN =
   /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/;
@@ -45,7 +59,7 @@ const MARKETPLACE_FILES = [
   "contract.json",
 ];
 
-class RuleError extends Error {}
+export class RuleError extends Error {}
 
 function fail(rule, message) {
   throw new RuleError(`[${rule}] ${message}`);
@@ -59,7 +73,7 @@ function sha256(data) {
   return createHash("sha256").update(data).digest("hex");
 }
 
-async function loadConfig() {
+export async function loadConfig() {
   const config = JSON.parse(
     await readFile(join(ROOT, "plugin.config.json"), "utf8"),
   );
@@ -109,7 +123,7 @@ function composerIconThemeFor(config, targetName) {
   return config.targets[targetName].composerIconTheme ?? "light";
 }
 
-async function loadSources(config) {
+export async function loadSources(config) {
   const icons = {};
   for (const name of ["prod", "dev"]) {
     icons[name] = {};
@@ -188,14 +202,75 @@ or every Wathba tool appears twice.
 
 // Returns Map<relativePath, Buffer|string> for one marketplace tree.
 /**
- * Parts of the skill for features only DEV has (AI calls today) sit between
+ * Parts of the skill for features only DEV has sit between
  * `<!-- dev-only... -->` and `<!-- /dev-only -->` lines: DEV keeps the text
  * without the markers, prod drops the whole block.
  */
 const DEV_ONLY_BLOCK = /^[ \t]*<!-- dev-only[^\n]*-->\n([\s\S]*?)^[ \t]*<!-- \/dev-only -->\n/gm;
 
-function skillFor(skill, targetName) {
+export function skillFor(skill, targetName) {
   return skill.replace(DEV_ONLY_BLOCK, (_, body) => (targetName === "prod" ? "" : body));
+}
+
+// Dotted names the skill may use that have a service code's shape: the app
+// files an agent reads to learn the stack, and paths into the fields of a
+// Wathba result. Both lists are closed on purpose: a list in the config, or
+// "anything ending in a file extension", would let a service code through
+// (domains.sh, or payments.moyasar added to an allowlist).
+const APP_FILE_NAMES = new Set([
+  "composer.json", "package.json", "pyproject.toml", "requirements.txt", "tsconfig.json",
+]);
+const RESULT_FIELD_ROOTS = new Set(["guidance", "notices", "operation", "playbook", "result"]);
+
+/** Every service-code-shaped name in a text, in order. */
+export function serviceCodesIn(text) {
+  return [...text.matchAll(SERVICE_CODE_SHAPE)]
+    .map(([match]) => match)
+    .filter((match) => match.split(".").every((part) => part.length >= 2))
+    .filter((match) => !APP_FILE_NAMES.has(match) && !RESULT_FIELD_ROOTS.has(match.split(".")[0]));
+}
+
+/**
+ * The rules for one target's built SKILL.md. `config` needs only
+ * `skill.tools` and `skill.nonToolTerms`.
+ */
+export function checkSkill(skill, config, targetName) {
+  const bytes = Buffer.byteLength(skill, "utf8");
+  if (bytes > SKILL_MAX_BYTES)
+    fail(
+      "skill",
+      `the built ${targetName} SKILL.md is ${bytes} bytes, over the ${SKILL_MAX_BYTES}-byte cap: ` +
+        "keep it a router, and put a service's guidance in its playbook on the server",
+    );
+  const frontmatter = /^---\n([\s\S]*?)\n---\n/.exec(skill);
+  if (!frontmatter) fail("skill", "SKILL.md lacks YAML frontmatter");
+  const nameLine = /^name:\s*(.+)$/m.exec(frontmatter[1]);
+  if (nameLine?.[1].trim() !== SKILL_NAME)
+    fail("skill", `skill name must be ${SKILL_NAME} to match its folder`);
+  const descriptionLine = /^description:\s*"?(.+?)"?\s*$/m.exec(frontmatter[1]);
+  if (!descriptionLine || descriptionLine[1].length > 1024)
+    fail("skill", "skill description is missing or over 1024 characters");
+  const [code] = serviceCodesIn(skill);
+  if (code)
+    fail(
+      "skill",
+      `SKILL.md names ${code}, which has the shape of a service code: the skill names no ` +
+        "service (an agent reads each one from get_wathba_service); write a URL with its scheme",
+    );
+  const declared = new Set(config.skill.tools);
+  const allowed = new Set([...declared, ...config.skill.nonToolTerms]);
+  for (const [, token] of skill.matchAll(/`([a-z][a-z0-9]*(?:_[a-z0-9]+)+)`/g))
+    if (!allowed.has(token))
+      fail("skill", `\`${token}\` is not a declared tool in plugin.config.json`);
+  for (const tool of declared)
+    if (!skill.includes(`\`${tool}\``))
+      fail("skill", `declared tool ${tool} does not appear in SKILL.md`);
+  if (/\bwathba (login|skill|mcp|install|integrate)\b/i.test(skill) || /npm install/i.test(skill))
+    fail("skill", "the shared skill must not depend on the Wathba CLI");
+  if (skill.includes("dev-only"))
+    fail("skill", "a dev-only marker is unbalanced, so it reached the package");
+  if (targetName === "prod" && /\bAI calls?\b|ai_calls|calls\.ai/i.test(skill))
+    fail("skill", "the prod skill mentions AI calls, which only DEV has");
 }
 
 function buildFiles(config, sources, targetName, version) {
@@ -500,29 +575,7 @@ function validate(config, targetName, files, version) {
   }
 
   // Skill.
-  const skill = text(files, `${pluginDir}/skills/${SKILL_NAME}/SKILL.md`);
-  const frontmatter = /^---\n([\s\S]*?)\n---\n/.exec(skill);
-  if (!frontmatter) fail("skill", "SKILL.md lacks YAML frontmatter");
-  const nameLine = /^name:\s*(.+)$/m.exec(frontmatter[1]);
-  if (nameLine?.[1].trim() !== SKILL_NAME)
-    fail("skill", `skill name must be ${SKILL_NAME} to match its folder`);
-  const descriptionLine = /^description:\s*"?(.+?)"?\s*$/m.exec(frontmatter[1]);
-  if (!descriptionLine || descriptionLine[1].length > 1024)
-    fail("skill", "skill description is missing or over 1024 characters");
-  const declared = new Set(config.skill.tools);
-  const allowed = new Set([...declared, ...config.skill.nonToolTerms]);
-  for (const [, token] of skill.matchAll(/`([a-z][a-z0-9]*(?:_[a-z0-9]+)+)`/g))
-    if (!allowed.has(token))
-      fail("skill", `\`${token}\` is not a declared tool in plugin.config.json`);
-  for (const tool of declared)
-    if (!skill.includes(`\`${tool}\``))
-      fail("skill", `declared tool ${tool} does not appear in SKILL.md`);
-  if (/\bwathba (login|skill|mcp|install|integrate)\b/i.test(skill) || /npm install/i.test(skill))
-    fail("skill", "the shared skill must not depend on the Wathba CLI");
-  if (skill.includes("dev-only"))
-    fail("skill", "a dev-only marker is unbalanced, so it reached the package");
-  if (targetName === "prod" && /\bAI calls?\b|ai_calls|calls\.ai/i.test(skill))
-    fail("skill", "the prod skill mentions AI calls, which only DEV has");
+  checkSkill(text(files, `${pluginDir}/skills/${SKILL_NAME}/SKILL.md`), config, targetName);
 
   // Contract and icon.
   const contract = parse(files, "contract.json");
@@ -719,7 +772,10 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  console.error(error instanceof RuleError ? error.message : error);
-  process.exit(1);
-});
+// Run only as a script, so sync.test.mjs can import the rules. Both sides are
+// real paths: a symlinked checkout must still run (sync.test.mjs checks it).
+if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url))
+  main().catch((error) => {
+    console.error(error instanceof RuleError ? error.message : error);
+    process.exit(1);
+  });
