@@ -212,11 +212,24 @@ export function skillFor(skill, targetName) {
   return skill.replace(DEV_ONLY_BLOCK, (_, body) => (targetName === "prod" ? "" : body));
 }
 
-/** Every service-code-shaped name in a text, in order. */
-export function serviceCodesIn(text) {
+// A dotted name whose last part is one of these is a file name, not a code.
+const FILE_EXTENSIONS = new Set([
+  "cjs", "css", "env", "go", "html", "java", "js", "json", "jsx", "lock", "md",
+  "mjs", "php", "py", "rb", "sh", "sql", "toml", "ts", "tsx", "txt", "yaml", "yml",
+]);
+
+/**
+ * Every service-code-shaped name in a text, in order. A file name
+ * (`package.json`) is none, and neither is a field path the config lists in
+ * `skill.fieldPaths` (`playbook.body`): a lowercase field path has a code's
+ * shape, so each one the skill needs is named there on purpose.
+ */
+export function serviceCodesIn(text, fieldPaths = []) {
+  const listed = new Set(fieldPaths);
   return [...text.matchAll(SERVICE_CODE_SHAPE)]
     .map(([match]) => match)
-    .filter((match) => match.split(".").every((part) => part.length >= 2));
+    .filter((match) => match.split(".").every((part) => part.length >= 2))
+    .filter((match) => !listed.has(match) && !FILE_EXTENSIONS.has(match.split(".").at(-1)));
 }
 
 /**
@@ -239,12 +252,13 @@ export function checkSkill(skill, config, targetName) {
   const descriptionLine = /^description:\s*"?(.+?)"?\s*$/m.exec(frontmatter[1]);
   if (!descriptionLine || descriptionLine[1].length > 1024)
     fail("skill", "skill description is missing or over 1024 characters");
-  const [code] = serviceCodesIn(skill);
+  const [code] = serviceCodesIn(skill, config.skill.fieldPaths ?? []);
   if (code)
     fail(
       "skill",
       `SKILL.md names ${code}, which has the shape of a service code: the skill names no ` +
-        "service (an agent reads each one from get_wathba_service); write a URL with its scheme",
+        "service (an agent reads each one from get_wathba_service); write a URL with its scheme, " +
+        "and list a field path the skill needs in skill.fieldPaths",
     );
   const declared = new Set(config.skill.tools);
   const allowed = new Set([...declared, ...config.skill.nonToolTerms]);

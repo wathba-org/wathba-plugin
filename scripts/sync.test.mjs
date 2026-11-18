@@ -154,6 +154,18 @@ describe("service codes", () => {
     passes(skill(`${allowed}\n`));
   });
 
+  test("lets a file name through, and a field path only when the config lists it", () => {
+    assert.deepEqual(serviceCodesIn("Read `package.json` and `tsconfig.build.json` for the stack."), []);
+    assert.deepEqual(serviceCodesIn("Read `playbook.body`."), ["playbook.body"]);
+    assert.deepEqual(serviceCodesIn("Read `playbook.body`.", ["playbook.body"]), []);
+    // Listing one path lets no service code through.
+    assert.deepEqual(serviceCodesIn("Read `playbook.body` of payments.moyasar.", ["playbook.body"]), [
+      "payments.moyasar",
+    ]);
+    // A code is still a code when its last part looks like nothing on the list.
+    assert.deepEqual(serviceCodesIn("Turn on calls.ai."), ["calls.ai"]);
+  });
+
   test("refuses a bare host name, because some codes end in a top-level domain", () => {
     assert.deepEqual(serviceCodesIn("Sign in at wathba.sa."), ["wathba.sa"]);
   });

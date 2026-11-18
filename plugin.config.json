@@ -51,9 +51,9 @@
       "ask_member",
       "card_opened",
       "flow_not_available",
-      "form_done",
       "get_service",
       "open_link",
+      "purchase_form",
       "report_wathba_issue",
       "verify_on_page"
     ]

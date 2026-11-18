@@ -33,7 +33,8 @@ numbers or secrets.
 
 1. Start each Wathba task with `list_wathba_notices`, then
    `list_wathba_projects`, and follow its first page's `guidance`: Wathba's
-   playbook for the whole task.
+   playbook for the whole task. Agree the project and environment with the
+   member before you act, and use the exact IDs from the results.
 2. Find services with `list_wathba_project_services` (search the whole
    catalog with `query` before saying a service doesn't exist) or
    `recommend_wathba_services_for_repository`.
@@ -59,16 +60,18 @@ Always name the environment: the exact `environmentId`, or `environmentKind`
 `flowId`: pass it to continue that flow instead of starting a new one. The
 `outcome` says what happened:
 
-- `card_opened`: a Wathba card is on screen. Point the member to it in one
-  short sentence, then end your turn. You hear when they're done: the card
-  posts a short message in their name, or they tell you. Then check with
-  `get_wathba_service` or the result's `nextStep`. Never call a card's own
-  commands. If no card appeared, or this app can't show cards, call
-  `open_wathba_flow` again with the `flowId` and `answers: {}` to go on in the
-  chat.
-- `form_done`: the member answered the form their app showed. Continue from
-  the result; don't ask the same questions again. `declined` means they
-  closed it and nothing changed: ask what they want.
+- A result with a `widget` (its `outcome` is `card_opened`, `card`, `form`,
+  `search` or `purchase_form`): a Wathba card is on screen. Point the member
+  to it in one short sentence, then end your turn. You hear when they're
+  done: the card posts a short message in their name, or they tell you. Then
+  check with `get_wathba_service` or the result's `nextStep`. Never call a
+  card's own commands. If no card appeared, or this app can't show cards,
+  call `open_wathba_flow` again with the `flowId` and `answers: {}` to go on
+  in the chat.
+- A result that says what happened after the member's app showed them a form
+  (for example `created` or `enabled`): they answered it. Continue from the
+  result; don't ask the same questions again. `declined` means they said no
+  or closed it and nothing changed: ask what they want.
 - `ask_member`: Wathba can't show its form here, so you ask. Put the result's
   `question` and each of its `fields` to the member in the chat, in their
   language, and end your turn. When they answer, call `nextStep` adding
@@ -83,10 +86,12 @@ Always name the environment: the exact `environmentId`, or `environmentKind`
 - `done`: the flow is finished.
 
 Never say a card or form opened when the outcome says it did not. Open at most
-one flow per turn, never in the same turn as a question; after `form_done` the
-member is still with you, so you may open the next flow they already asked
-for. If the answer is `flow_not_available`, follow its `nextStep` and tell the
-member what the service needs.
+one flow per turn, never in the same turn as a question; after the member
+answered a form in their app they are still with you, so you may open the
+next flow they already asked for. If the call fails with
+`flow_not_available`, the service can't be turned on from here: follow the
+error's message, read the service again with `get_wathba_service`, and tell
+the member what it needs.
 
 ## Keep the member oriented
 
