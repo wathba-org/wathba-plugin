@@ -21,7 +21,7 @@ import {
 const ROOT = resolve(import.meta.dirname, "..");
 const config = {
   skill: {
-    tools: ["get_wathba_service", "open_wathba_flow"],
+    tools: ["wathba_get_service", "wathba_open_flow"],
     nonToolTerms: ["card_opened"],
   },
 };
@@ -30,8 +30,46 @@ const config = {
 function skill(body = "", description = "Use for anything involving Wathba.") {
   return (
     `---\nname: wathba\ndescription: "${description}"\n---\n\n# Wathba\n\n` +
-    `Read \`get_wathba_service\`, then \`open_wathba_flow\`.\n${body}`
+    `Read \`wathba_get_service\`, then \`wathba_open_flow\`.\n${body}`
   );
+}
+
+// The four tools every host lists, and the names that left the list: each
+// tool by its own name and by the name hosts listed before it (the platform's
+// juriba/mcp-four-tools). The 16 stay callable in chats opened before, but no
+// new chat lists them: their work is now operations.
+const FOUR_TOOLS = [
+  "wathba_execute_read_operation",
+  "wathba_execute_write_operation",
+  "wathba_get_service",
+  "wathba_open_flow",
+];
+const UNLISTED_TOOLS = {
+  get_service: "get_wathba_service",
+  open_flow: "open_wathba_flow",
+  execute_read_operation: "execute_wathba_read_operation",
+  execute_write_operation: "execute_wathba_write_operation",
+  list_notices: "list_wathba_notices",
+  list_projects: "list_wathba_projects",
+  get_project_setup: "get_wathba_project_setup",
+  list_project_services: "list_wathba_project_services",
+  get_service_integration_docs: "get_wathba_service_integration_docs",
+  recommend_services_for_repository: "recommend_wathba_services_for_repository",
+  create_project: "create_wathba_project",
+  report_issue: "report_wathba_issue",
+  get_domain_dns_records: "get_wathba_domain_dns_records",
+  change_domain_dns_record: "change_wathba_domain_dns_record",
+  change_domain_nameservers: "change_wathba_domain_nameservers",
+  inspect_api_upgrade: "inspect_wathba_api_upgrade",
+  preview_api_upgrade: "preview_wathba_api_upgrade",
+  prepare_api_upgrade: "prepare_wathba_api_upgrade",
+  apply_api_upgrade: "apply_wathba_api_upgrade",
+  rollback_api_upgrade: "rollback_wathba_api_upgrade",
+};
+
+/** Whether `text` names `tool` as a whole word (get_service is inside wathba_get_service). */
+function names(text, tool) {
+  return new RegExp(`(?<![A-Za-z0-9_])${tool}(?![A-Za-z0-9_])`).test(text);
 }
 
 function passes(text, target = "prod") {
@@ -56,23 +94,20 @@ describe("the committed skill", () => {
     }
   });
 
-  test("names none of the DNS and API upgrade tools the platform is retiring", async () => {
+  test("relies on exactly the four listed tools", async () => {
+    const real = await loadConfig();
+    assert.deepEqual([...real.skill.tools].sort(), FOUR_TOOLS);
+  });
+
+  test("names no tool outside the four, by its own name or the one hosts listed before", async () => {
     const real = await loadConfig();
     const { skill: source } = await loadSources(real);
-    const retiring = [
-      "get_wathba_domain_dns_records",
-      "change_wathba_domain_dns_record",
-      "change_wathba_domain_nameservers",
-      "inspect_wathba_api_upgrade",
-      "preview_wathba_api_upgrade",
-      "prepare_wathba_api_upgrade",
-      "apply_wathba_api_upgrade",
-      "rollback_wathba_api_upgrade",
-    ];
-    for (const tool of retiring) {
-      assert.ok(!real.skill.tools.includes(tool), `${tool} is in skill.tools`);
-      assert.ok(!source.includes(tool), `${tool} is in SKILL.md`);
-    }
+    for (const [own, listed] of Object.entries(UNLISTED_TOOLS))
+      for (const tool of [own, listed]) {
+        assert.ok(!real.skill.tools.includes(tool), `${tool} is in skill.tools`);
+        assert.ok(!real.skill.nonToolTerms.includes(tool), `${tool} is in skill.nonToolTerms`);
+        assert.ok(!names(source, tool), `${tool} is in SKILL.md`);
+      }
   });
 });
 
@@ -187,8 +222,13 @@ describe("declared tools", () => {
   });
 
   test("fail when a declared tool is not in the skill", () => {
-    const text = skill().replace("`open_wathba_flow`", "the flow tool");
-    fails(text, /declared tool open_wathba_flow does not appear/);
+    const text = skill().replace("`wathba_open_flow`", "the flow tool");
+    fails(text, /declared tool wathba_open_flow does not appear/);
+  });
+
+  test("fail the older names of a listed tool", () => {
+    fails(skill("Then `get_wathba_service`.\n"), /`get_wathba_service` is not a declared tool/);
+    fails(skill("Then `get_service`.\n"), /`get_service` is not a declared tool/);
   });
 
   test("allow a declared non-tool term", () => {
