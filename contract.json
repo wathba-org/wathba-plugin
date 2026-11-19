@@ -6,15 +6,9 @@
   "serverKey": "wathba",
   "mcpEndpoint": "https://api.wathba.sa/mcp",
   "tools": [
-    "execute_wathba_read_operation",
-    "execute_wathba_write_operation",
-    "get_wathba_project_setup",
-    "get_wathba_service",
-    "get_wathba_service_integration_docs",
-    "list_wathba_notices",
-    "list_wathba_project_services",
-    "list_wathba_projects",
-    "open_wathba_flow",
-    "recommend_wathba_services_for_repository"
+    "wathba_execute_read_operation",
+    "wathba_execute_write_operation",
+    "wathba_get_service",
+    "wathba_open_flow"
   ]
 }
