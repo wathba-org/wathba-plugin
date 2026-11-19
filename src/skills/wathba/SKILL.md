@@ -37,15 +37,16 @@ that isn't listed.
    the results.
 2. To find how to do something, call `wathba_get_service` with `query` (the
    member's task in plain words) or a `serviceCode`, plus the `projectId` and
-   their `locale`. It returns the operations and flows that fit, with their
-   inputs. Search before you say Wathba lacks a service. Follow a service's
+   their `locale`. It returns the operations and flows that fit;
+   `operationCode` gives one's input. Search before you say Wathba lacks a
+   service. Follow a service's
    `playbook`, `nextStep`, `flows` and `operations`.
 3. Run an operation exactly as `wathba_get_service` described it
    (`serviceCode`, `operationCode`, `input`, any `projectId`): a read with
    `wathba_execute_read_operation`, a write with
    `wathba_execute_write_operation` and an `idempotencyKey`, new for each
-   write and the same to retry it. Only the member approves a Live write,
-   on their Wathba page.
+   write and the same to retry it. Only the member approves a partner's
+   Live write, on their Wathba page; Wathba's own writes act at once.
 4. Write the app's code only from the service's integration docs
    (`getServiceIntegrationDocs`). Check each outcome with
    `wathba_get_service`, or `getProjectSetup` for keys, never from memory.
@@ -102,9 +103,9 @@ the member what it needs.
 
 ## Keep the member oriented
 
-Many members have never deployed an app. At the start of a Wathba task and
-after each step finishes, show these go-live steps as a short checklist, each
-marked done, next or to do, with who does it:
+At the start of a Wathba task and after each step finishes, show these
+go-live steps as a short checklist, each marked done, next or to do, with who
+does it:
 
 1. Sandbox (you): the project's sandbox, a free simulation, with each service
    the app needs on.
