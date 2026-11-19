@@ -31,7 +31,7 @@ If your list shows other names for them, use those, and never call a tool
 that isn't listed.
 
 1. Start each Wathba task with `wathba_get_service` with no arguments,
-   Wathba's home: its rules, notices, the member's projects and the
+   Wathba's home: its rules, the member's projects and the
    catalog. Follow its rules and `nextStep`. Agree the project and
    environment with the member before you act, and use the exact IDs from
    the results.
