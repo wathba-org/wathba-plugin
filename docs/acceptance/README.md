@@ -14,12 +14,12 @@ for anything that writes.
 |---|---|
 | Fresh install | Plugin listed with the right name and icon; skill listed; exactly one Wathba MCP server |
 | OAuth | Browser consent shows full access; the host stores the token; granted scopes are `mcp:read mcp:api-contracts:upgrade projects:create` |
-| Tool list | The host lists Wathba's fixed tools (20, or 19 while `report_wathba_issue` is off), every tool in `contract.json` among them, and none of the old `open_*` card tools |
-| Read | `list_wathba_notices`, `list_wathba_projects`, `list_wathba_project_services`, `get_wathba_service`, `get_wathba_service_integration_docs` each return a tool result, not only a transport success |
-| Create project | `create_wathba_project`, or `open_wathba_flow` with flow `create_project`, creates exactly one sandbox project |
+| Tool list | The model sees exactly Wathba's four tools, the ones in `contract.json` (`wathba_get_service`, `wathba_open_flow`, `wathba_execute_read_operation`, `wathba_execute_write_operation`); a card host may also load the tools its cards call, hidden from the model |
+| Read | `wathba_get_service` with no arguments (the home), with a `query` and with a `serviceCode`, and `wathba_execute_read_operation` running Wathba's `listNotices`, `listProjects`, `listProjectServices` and `getServiceIntegrationDocs`, each return a tool result, not only a transport success |
+| Create project | `wathba_execute_write_operation` running Wathba's `createProject`, or `wathba_open_flow` with flow `create_project`, creates exactly one sandbox project |
 | Replay | The same `idempotencyKey` returns the same project and creates no duplicate |
-| Flow | `open_wathba_flow` answers by host: `card_opened` with a card (card hosts), `form_done` from the host's form (Claude Code), or `open_link` (Codex CLI and others) whose `/agent/flow/<flowId>` page finishes the same step signed in |
-| Live approval | A Live `execute_wathba_write_operation` returns `approval_required`; it runs only after the member approves on the signed-in flow page, and a repeat with the same `idempotencyKey` returns the stored result |
+| Flow | `wathba_open_flow` answers by host: `card_opened` with a card (card hosts), `form_done` from the host's form (Claude Code), or `open_link` (Codex CLI and others) whose `/agent/flow/<flowId>` page finishes the same step signed in |
+| Live approval | A Live `wathba_execute_write_operation` returns `approval_required`; it runs only after the member approves on the signed-in flow page, and a repeat with the same `idempotencyKey` returns the stored result |
 | Missing scope | A pre-full-access token gets a clear step-up, re-authorizes, and the call succeeds |
 | Recovery | An expired access token refreshes silently; a revoked session leads to a reconnect prompt; a 5xx gives a clear error with no retry loop |
 | Update | A new `dev` publish is picked up (Codex on restart; Claude Code via `/plugin marketplace update` or auto-update) |
