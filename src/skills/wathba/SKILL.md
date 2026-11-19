@@ -30,8 +30,8 @@ upgrades, reporting an issue), is an operation or a flow, never a new tool.
 If your list shows other names for them, use those, and never call a tool
 that isn't listed.
 
-1. Start each Wathba task with `wathba_get_service` with no arguments:
-   Wathba's home, with its rules, notices, the member's projects and its
+1. Start each Wathba task with `wathba_get_service` with no arguments,
+   Wathba's home: its rules, notices, the member's projects and the
    catalog. Follow its rules and `nextStep`. Agree the project and
    environment with the member before you act, and use the exact IDs from
    the results.
@@ -39,27 +39,28 @@ that isn't listed.
    member's task in plain words) or a `serviceCode`, plus the `projectId` and
    their `locale`. It returns the operations and flows that fit, with their
    inputs. Search before you say Wathba lacks a service. Follow a service's
-   `playbook` (its rules), `nextStep`, `flows` and `operations`.
+   `playbook`, `nextStep`, `flows` and `operations`.
 3. Run an operation exactly as `wathba_get_service` described it
    (`serviceCode`, `operationCode`, `input`, any `projectId`): a read with
    `wathba_execute_read_operation`, a write with
    `wathba_execute_write_operation` and an `idempotencyKey`, new for each
-   write and the same to retry it. Never approve a Live write for the
-   member: they do it on their own Wathba page.
+   write and the same to retry it. Only the member approves a Live write,
+   on their Wathba page.
 4. Write the app's code only from the service's integration docs
    (`getServiceIntegrationDocs`). Check each outcome with
    `wathba_get_service`, or `getProjectSetup` for keys, never from memory.
 
 ## How `wathba_open_flow` reaches the member
 
-It is the only tool that asks the member anything: a Wathba card, the app's
-own form or questions in the chat, depending on the app. Wathba's home lists
-the account's own flows; `wathba_get_service` lists a service's. Never fill a
-flow in or answer for the member: pass what they already told you as
-`prefill`. Always name the environment: the exact `environmentId`, or
-`environmentKind` `production` for Live when the project has none yet. Every
-result names its `flowId`: pass it to continue that flow instead of starting
-a new one. The `outcome` says what happened:
+It opens each step the member does themselves, as the app allows: a Wathba
+card, the app's own form or questions in the chat, and is the only tool that
+asks them anything. Wathba's home lists the account's own flows;
+`wathba_get_service` lists a service's. Never fill a flow in or answer for
+the member: pass what they already told you as `prefill`. Always name the
+environment: the exact `environmentId`, or `environmentKind` `production` for
+Live when the project has none yet. Every result names its `flowId`: pass it
+to continue that flow instead of starting a new one. The `outcome` says what
+happened:
 
 - `card_opened`, `card`, `form`, `search` or `purchase_form`: a Wathba card
   is on screen and shows where the step stands. Point the member to it in one
