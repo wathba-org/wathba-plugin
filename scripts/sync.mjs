@@ -29,7 +29,7 @@ const REGISTRY_SCHEMA =
   "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json";
 const SKILL_NAME = "wathba";
 // The skill is a router that never changes when Wathba adds a service: each
-// service's guidance comes from the server (get_wathba_service's playbook).
+// service's guidance comes from the server (wathba_get_service's playbook).
 // The cap keeps per-service text from creeping back in; it counts the built
 // SKILL.md in UTF-8 bytes, so Arabic counts double.
 export const SKILL_MAX_BYTES = 8000;
@@ -255,7 +255,7 @@ export function checkSkill(skill, config, targetName) {
     fail(
       "skill",
       `SKILL.md names ${code}, which has the shape of a service code: the skill names no ` +
-        "service (an agent reads each one from get_wathba_service); write a URL with its scheme",
+        "service (an agent reads each one from wathba_get_service); write a URL with its scheme",
     );
   const declared = new Set(config.skill.tools);
   const allowed = new Set([...declared, ...config.skill.nonToolTerms]);

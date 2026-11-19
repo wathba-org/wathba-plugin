@@ -63,12 +63,15 @@ skill rules.
 ### The skill is a router
 
 The skill never changes when Wathba adds a service, a flow, an operation or a
-rule for a service. The server serves all of that: each service's playbook,
-flows and operations in `get_wathba_service`, its code in its integration
-docs, and the cross-service rules in `list_wathba_projects`' first-page
-guidance. The skill keeps only what never changes: how to connect, how to
-route a task through those tools, what each `open_wathba_flow` outcome means,
-the go-live checklist and the language rule. `check` holds it to that:
+rule for a service. The server lists four tools (`wathba_get_service`,
+`wathba_open_flow`, `wathba_execute_read_operation` and
+`wathba_execute_write_operation`) and serves the rest: Wathba's rules,
+notices, projects, own operations and catalog in `wathba_get_service` with no
+arguments (the home), each service's playbook, flows and operations in
+`wathba_get_service`, and its code in its integration docs. The skill keeps
+only what never changes: how to connect, how to route a task through those
+tools, what each `wathba_open_flow` outcome means, the go-live checklist and
+the language rule. `check` holds it to that:
 
 - The built `SKILL.md` is at most 8,000 bytes (UTF-8, so Arabic counts double).
 - It names no service code: no lowercase dotted name such as
@@ -78,7 +81,8 @@ the go-live checklist and the language rule. `check` holds it to that:
   into a Wathba result's fields (`playbook.body`, `result.outcome`). Nothing
   in `plugin.config.json` can let a code through.
 - It names only the tools in `skill.tools`, plus the other snake_case terms
-  in `skill.nonToolTerms` (outcomes, flows, older tool names).
+  in `skill.nonToolTerms` (outcomes and flows). The unit tests hold
+  `skill.tools` to the four tools and refuse every older tool name.
 
 | Workflow | When | What it does |
 |---|---|---|
