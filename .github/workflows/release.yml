@@ -75,6 +75,10 @@ jobs:
           set -euo pipefail
           out="$RUNNER_TEMP/release"
           assets=("$out/wathba-plugin-${VERSION}.zip" "$out/server.json" "$out/SHA256SUMS")
+          # Gemini CLI installs a release's asset named linux.*, darwin.* or
+          # win32.* first, else its only asset, else the tag's source tarball
+          # (which holds gemini-extension.json). Keep two or more, none named so.
+          (( ${#assets[@]} >= 2 )) || { echo "the release must keep at least two assets for Gemini CLI" >&2; exit 1; }
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             # A re-run after a failed registry publish: keep the published
             # assets (never clobber them) and upload only the missing ones.
@@ -90,10 +94,6 @@ jobs:
             --repo "$GITHUB_REPOSITORY" --verify-tag \
             --title "Wathba plugin ${VERSION}" \
             --notes "Production Wathba plugin ${VERSION} (wathba@wathba). Install with \`/plugin marketplace add wathba-org/wathba-plugin\` in Claude Code or \`codex plugin marketplace add wathba-org/wathba-plugin\` in Codex."
-          # Gemini CLI takes a release's only asset as the extension. With two or
-          # more it takes the tag's source tarball, which holds the manifest.
-          count="$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets | length')"
-          [[ "$count" -ge 2 ]] || { echo "the release must keep at least two assets for Gemini CLI" >&2; exit 1; }
 
   registry:
     needs: release

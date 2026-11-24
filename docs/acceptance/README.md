@@ -37,7 +37,7 @@ For Cursor and Gemini CLI, record the outcome they actually get.
 | Live approval | A Live `wathba_execute_write_operation` returns `approval_required`; it runs only after the member approves on the signed-in flow page, and a repeat with the same `idempotencyKey` returns the stored result |
 | Missing scope | A pre-full-access token gets a clear step-up, re-authorizes, and the call succeeds |
 | Recovery | An expired access token refreshes silently; a revoked session leads to a reconnect prompt; a 5xx gives a clear error with no retry loop |
-| Update | A new `dev` publish is picked up (Codex on restart; Claude Code via `/plugin marketplace update` or auto-update; Gemini CLI via `gemini extensions update`) |
+| Update | A new `dev` publish is picked up (Codex on restart; Claude Code via `/plugin marketplace update` or auto-update; Gemini CLI via `gemini extensions update`, after pulling the clone for DEV) |
 | Rollback | Re-publishing the previous `main` commit returns the host to it (Gemini CLI follows releases: it needs a new release tag) |
 | One connection | With the plugin and a direct MCP connection both present, the behavior matches the README warning |
 

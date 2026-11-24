@@ -326,6 +326,12 @@ describe("Gemini CLI and Cursor packages", () => {
       g.mcpServers.wathba.url = "https://apidev.wathba.sa/mcp";
     }), /must point http at https:\/\/api\.wathba\.sa\/mcp/);
     rejects(config, "prod", edited(files, "gemini-extension.json", (g) => {
+      g.mcpServers.wathba.type = "sse";
+    }), /must point http at https:\/\/api\.wathba\.sa\/mcp/);
+    rejects(config, "prod", edited(files, "gemini-extension.json", (g) => {
+      g.mcpServers = { "wathba-dev": g.mcpServers.wathba };
+    }), /exactly the wathba server/);
+    rejects(config, "prod", edited(files, "gemini-extension.json", (g) => {
       g.mcpServers.wathba.headers = { "X-Key": "1" };
     }), /unexpected key headers/);
   });
@@ -373,6 +379,7 @@ describe("Gemini CLI and Cursor packages", () => {
     rejects(config, "prod", edited(files, path, (m) => { m.name = "wathba-development"; }), /Cursor marketplace name or plugin count/);
     rejects(config, "prod", edited(files, path, (m) => { m.plugins.push({ ...m.plugins[0] }); }), /Cursor marketplace name or plugin count/);
     rejects(config, "prod", edited(files, path, (m) => { m.plugins[0].source = "./plugins/other"; }), /Cursor marketplace entry name or source/);
+    rejects(config, "prod", edited(files, path, (m) => { m.plugins[0].name = "wathba-dev"; }), /Cursor marketplace entry name or source/);
   });
 
   test("refuses a Cursor manifest with another identity, version or author shape", async () => {
@@ -407,6 +414,16 @@ describe("Gemini CLI and Cursor packages", () => {
 // the root comparison, the owned paths and the version gate are exercised as
 // CI runs them.
 describe("the committed root", () => {
+  // Git and sync.mjs (version-rule runs git) get none of the caller's GIT_*
+  // variables or global and system config: a pre-commit hook's
+  // GIT_INDEX_FILE or GIT_DIR would otherwise point them at the real
+  // repository, and commit.gpgsign would fail the commit.
+  const env = {
+    ...Object.fromEntries(Object.entries(process.env).filter(([key]) => !key.startsWith("GIT_"))),
+    GIT_CONFIG_GLOBAL: "/dev/null",
+    GIT_CONFIG_NOSYSTEM: "1",
+  };
+
   function copy() {
     const dir = mkdtempSync(join(tmpdir(), "wathba-root-"));
     cpSync(ROOT, dir, {
@@ -418,7 +435,7 @@ describe("the committed root", () => {
 
   function run(dir, ...args) {
     try {
-      execFileSync(process.execPath, [join(dir, "scripts/sync.mjs"), ...args], { cwd: dir, encoding: "utf8", stdio: "pipe" });
+      execFileSync(process.execPath, [join(dir, "scripts/sync.mjs"), ...args], { cwd: dir, encoding: "utf8", stdio: "pipe", env });
       return "";
     } catch (error) {
       return `${error.stderr}`;
@@ -439,6 +456,11 @@ describe("the committed root", () => {
       writeFileSync(join(dir, "hooks/hooks.json"), "{}\n");
     }, /unexpected hooks/],
     ["a root Cursor manifest", (dir) => writeFileSync(join(dir, ".cursor-plugin/plugin.json"), "{}\n"), /unexpected .cursor-plugin\/plugin.json/],
+    ["a root plugin.json", (dir) => writeFileSync(join(dir, "plugin.json"), "{}\n"), /unexpected plugin.json/],
+    ...["commands", "agents", "policies"].map((folder) => [`a root ${folder} folder`, (dir) => {
+      mkdirSync(join(dir, folder));
+      writeFileSync(join(dir, folder, "x.md"), "x\n");
+    }, new RegExp(`unexpected ${folder}:`)]),
   ];
 
   test("passes on an untouched copy", () => {
@@ -467,7 +489,7 @@ describe("the committed root", () => {
       mkdirSync(join(dir, "skills/old"), { recursive: true });
       writeFileSync(join(dir, "skills/old/SKILL.md"), "old\n");
       writeFileSync(join(dir, "skills/wathba/SKILL.md"), "stale\n");
-      execFileSync(process.execPath, [join(dir, "scripts/sync.mjs"), "build", "--target", "prod", "--out", dir], { stdio: "pipe" });
+      execFileSync(process.execPath, [join(dir, "scripts/sync.mjs"), "build", "--target", "prod", "--out", dir], { stdio: "pipe", env });
       assert.equal(existsSync(join(dir, "skills/old")), false);
       assert.equal(
         readFileSync(join(dir, "skills/wathba/SKILL.md"), "utf8"),
@@ -483,7 +505,7 @@ describe("the committed root", () => {
     test(`version-rule asks for a new version when only ${name} changes`, () => {
       const dir = copy();
       try {
-        const git = (...args) => execFileSync("git", ["-c", "user.name=t", "-c", "user.email=t@example.com", ...args], { cwd: dir, stdio: "pipe" });
+        const git = (...args) => execFileSync("git", ["-c", "user.name=t", "-c", "user.email=t@example.com", ...args], { cwd: dir, stdio: "pipe", env });
         git("init", "-q");
         git("add", "-A");
         git("commit", "-q", "-m", "base");

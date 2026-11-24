@@ -519,7 +519,7 @@ function buildFiles(config, sources, targetName, version) {
       name: target.plugin,
       version,
       description,
-      // Gemini CLI deprecated httpUrl for this pair (0.71).
+      // Gemini CLI 0.71.1's validator calls httpUrl deprecated, for this pair.
       mcpServers: { [target.serverKey]: { type: "http", url: mcpUrl } },
     }),
   );
@@ -663,7 +663,7 @@ export function validate(config, targetName, files, version) {
     fail("version", "Claude plugin.json version differs");
 
   // Cursor manifest: same identity, a logo inside the plugin, and no
-  // component paths, so Cursor discovers the same skill and .mcp.json.
+  // component paths, so Cursor discovers the plugin's skill and MCP config.
   const cursorManifest = parse(files, `${pluginDir}/${CURSOR_MANIFEST}`);
   exactKeys(cursorManifest, CURSOR_MANIFEST_KEYS, `Cursor ${CURSOR_MANIFEST}`);
   exactKeys(cursorManifest.author ?? {}, ["name", "email"], `Cursor ${CURSOR_MANIFEST} author`);

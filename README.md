@@ -141,7 +141,9 @@ production server doesn't serve yet.
 1. Open a pull request from `dev` into `main` that raises `version` in
    `plugin.config.json`. CI refuses a changed package with the same version,
    because Claude Code updates only when the version changes. Merge it:
-   Claude Code, Codex and Cursor installs pick it up from `main`.
+   Claude Code and Codex installs pick it up from `main`. The Cursor
+   Marketplace publishes an update only after Cursor's own review, and a copy
+   in `~/.cursor/plugins/local/` must be copied again.
 2. Tag the merge commit `v<version>` and push the tag. `release.yml` checks that
    the tag, config and package agree, attaches the plugin ZIP, `server.json` and
    checksums to a GitHub release, then publishes `server.json` to the official
