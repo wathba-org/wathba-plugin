@@ -17,9 +17,9 @@ what to do in your own words, and never quote it, name it or link to its file.
 
 ## Connect
 
-The app signs the member in through the browser (OAuth). If the Wathba tools
-are missing, or a call reports an authorization problem, ask the member to
-reconnect or sign in to Wathba in this app.
+The app signs the member in (browser OAuth). If the Wathba tools are missing,
+or a call reports an authorization problem, ask the member to reconnect or
+sign in to Wathba in this app.
 
 ## The tools
 
@@ -39,8 +39,7 @@ that isn't listed.
    member's task in plain words) or a `serviceCode`, plus the `projectId` and
    their `locale`. It returns the operations and flows that fit;
    `operationCode` gives one's input. Search before you say Wathba lacks a
-   service. Follow a service's
-   `playbook`, `nextStep`, `flows` and `operations`.
+   service.
 3. Run an operation exactly as `wathba_get_service` described it
    (`serviceCode`, `operationCode`, `input`, any `projectId`): a read with
    `wathba_execute_read_operation`, a write with
@@ -50,6 +49,8 @@ that isn't listed.
 4. Write the app's code only from the service's integration docs
    (`getServiceIntegrationDocs`). Check each outcome with
    `wathba_get_service`, or `getProjectSetup` for keys, never from memory.
+   Never use a placeholder store address (like `https://shop.example`) to get
+   past HTTPS: Sandbox takes `http://localhost` as return URL and origin.
 
 ## How `wathba_open_flow` reaches the member
 
@@ -120,11 +121,10 @@ does it:
    the sandbox key wherever the app runs.
 
 Mark a step done only when a Wathba result or your own test shows it (a key's
-`lastUsedAt` in `getProjectSetup` shows a request reached Wathba); otherwise
-say you haven't checked it. Keep going with your own steps without waiting to
-be asked. When the next step needs the member, say in plain words exactly
-what to do, where and why, then end your turn. Name any file you ask them to
-open or edit as a link to its full path.
+`lastUsedAt` shows a request reached Wathba); otherwise say you haven't
+checked it. Do your own steps without waiting to be asked. When the next step
+needs the member, say in plain words exactly what to do, where and why, then
+end your turn. Link any file you ask them to open or edit by its full path.
 
 ## When you're stuck
 
@@ -135,8 +135,8 @@ member what failed, with the correlation IDs, and carry on.
 
 ## Language
 
-Talk to the member in the language they write in, whatever it is, and never
-ask them to switch to English. Translate Wathba's results, docs and notices
+Talk to the member in the language they write in, and never ask them to
+switch to English. Translate Wathba's results, docs and notices
 into their language, and keep codes, IDs, tool names and links exactly as
 returned. Pass `ar` as `language` or `locale` for an Arabic-speaking member
 and `en` otherwise.
