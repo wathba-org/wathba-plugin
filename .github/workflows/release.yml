@@ -46,6 +46,8 @@ jobs:
           [[ "$TAG" == "v${version}" ]] || { echo "tag $TAG does not match v${version}" >&2; exit 1; }
           [[ "$(jq -r '.version' plugins/wathba/plugin.json)" == "$version" ]]
           [[ "$(jq -r '.version' server.json)" == "$version" ]]
+          # Gemini CLI installs this tag's source tarball; it needs the root manifest.
+          [[ "$(jq -r '.version' gemini-extension.json)" == "$version" ]]
           git merge-base --is-ancestor "$GITHUB_SHA" origin/main || { echo "the tag is not on main" >&2; exit 1; }
           echo "version=$version" >>"$GITHUB_OUTPUT"
 
@@ -73,6 +75,10 @@ jobs:
           set -euo pipefail
           out="$RUNNER_TEMP/release"
           assets=("$out/wathba-plugin-${VERSION}.zip" "$out/server.json" "$out/SHA256SUMS")
+          # Gemini CLI installs a release's asset named linux.*, darwin.* or
+          # win32.* first, else its only asset, else the tag's source tarball
+          # (which holds gemini-extension.json). Keep two or more, none named so.
+          (( ${#assets[@]} >= 2 )) || { echo "the release must keep at least two assets for Gemini CLI" >&2; exit 1; }
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             # A re-run after a failed registry publish: keep the published
             # assets (never clobber them) and upload only the missing ones.

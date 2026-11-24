@@ -1,0 +1,11 @@
+{
+  "name": "wathba",
+  "version": "2.8.0",
+  "description": "Connect your coding agent to Wathba over MCP: projects, notices, service docs, sandbox project creation and member-confirmed API upgrades for Saudi payments, OTP and domains.",
+  "mcpServers": {
+    "wathba": {
+      "type": "http",
+      "url": "https://api.wathba.sa/mcp"
+    }
+  }
+}
