@@ -26,6 +26,23 @@ codex plugin add wathba-dev@wathba-development
 Installing from the app's Plugins page starts sign-in; in a terminal run
 `codex mcp login wathba-dev`.
 
+## Gemini CLI
+
+```sh
+git clone --branch dev-marketplace https://github.com/wathba-org/wathba-plugin wathba-dev-extension
+gemini extensions install ./wathba-dev-extension
+```
+
+Then run `/mcp auth wathba-dev` in Gemini CLI and sign in. To update, pull the
+clone, then run `gemini extensions update wathba-dev`. Install either this or
+the production extension, not both: Gemini CLI keeps only one `wathba` skill.
+
+## Cursor
+
+Copy `plugins/wathba-dev` to `~/.cursor/plugins/local/wathba-dev` and run
+**Developer: Reload Window**, then sign in to the `wathba-dev` server from
+Cursor's MCP settings.
+
 ## Moving from the old DEV marketplace
 
 The marketplace keeps its name, so remove the old one first:

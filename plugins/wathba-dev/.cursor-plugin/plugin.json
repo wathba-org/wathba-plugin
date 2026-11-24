@@ -1,0 +1,22 @@
+{
+  "name": "wathba-dev",
+  "displayName": "Wathba Dev",
+  "version": "2.8.0-dev.54",
+  "description": "Connect your coding agent to the Wathba development environment over MCP: projects, notices, service docs, sandbox project creation and member-confirmed API upgrades for Saudi payments, OTP and domains.",
+  "author": {
+    "name": "Wathba",
+    "email": "juriba@wathba.sa"
+  },
+  "homepage": "https://platformdev.wathba.sa/docs/mcp",
+  "repository": "https://github.com/wathba-org/wathba-plugin",
+  "license": "Apache-2.0",
+  "keywords": [
+    "wathba",
+    "وثبة",
+    "mcp",
+    "payments",
+    "otp",
+    "domains"
+  ],
+  "logo": "assets/wathba-icon-light.png"
+}

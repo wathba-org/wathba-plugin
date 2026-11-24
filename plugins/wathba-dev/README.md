@@ -1,7 +1,7 @@
 # Wathba Dev
 
-Connects Codex, Claude Code and other Agent Plugins clients to the Wathba development environment
-over MCP. The member signs in through the browser (OAuth); no API key or token
+Connects Codex, Claude Code, Cursor, Gemini CLI and other Agent Plugins
+clients to the Wathba development environment over MCP. The member signs in through the browser (OAuth); no API key or token
 ever goes through the chat.
 
 - MCP server: https://apidev.wathba.sa/mcp
@@ -28,6 +28,28 @@ codex plugin add wathba-dev@wathba-development
 Installing from the app's Plugins page starts sign-in. In a terminal, run
 `codex mcp login wathba-dev`. Codex checks the marketplace for
 updates when it starts.
+
+## Gemini CLI
+
+```sh
+git clone --branch dev-marketplace https://github.com/wathba-org/wathba-plugin wathba-dev-extension
+gemini extensions install ./wathba-dev-extension
+```
+
+To update, pull the clone, then run `gemini extensions update wathba-dev`.
+Install either this or the production extension, not both: Gemini CLI keeps
+only one `wathba` skill.
+
+Then run `/mcp auth wathba-dev` in Gemini CLI and sign in.
+
+## Cursor
+
+Copy
+this folder (`plugins/wathba-dev` in
+`wathba-org/wathba-plugin`, branch `dev-marketplace`) to
+`~/.cursor/plugins/local/wathba-dev` and run **Developer: Reload
+Window**. Then sign in to the `wathba-dev` server from Cursor's MCP
+settings.
 
 ## One connection
 
