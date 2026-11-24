@@ -1,8 +1,8 @@
 # Wathba agent plugin
 
 The official [Wathba (وثبة)](https://wathba.sa) plugin for AI coding agents.
-It connects Codex, the ChatGPT desktop app, Claude Code and other Agent Plugins
-clients to Wathba's hosted MCP server, and adds one short skill that tells the
+It connects Codex, the ChatGPT desktop app, Claude Code, Cursor, Gemini CLI and
+other Agent Plugins clients to Wathba's hosted MCP server, and adds one short skill that tells the
 agent how to use it. Payments, OTP and domains reach your app through Wathba; the plugin never handles API keys, and members
 sign in through the browser (OAuth).
 
@@ -37,6 +37,30 @@ For the development environment, add `--ref dev-marketplace` and install
 sign-in; in a terminal, run `codex mcp login wathba` (or `wathba-dev`). Codex
 checks the marketplace for updates when it starts.
 
+### Gemini CLI
+
+```sh
+gemini extensions install https://github.com/wathba-org/wathba-plugin
+```
+
+Then run `/mcp auth wathba` in Gemini CLI and sign in. Gemini CLI installs the
+latest GitHub release, so production support starts with the first release
+that carries `gemini-extension.json`. Update with
+`gemini extensions update wathba`. For the development environment, clone the
+`dev-marketplace` branch and install the clone's folder
+(`gemini extensions install ./<folder>`, extension `wathba-dev`). Gemini CLI
+0.71.1's own `--ref` install failed when tried on 2026-11-24: its `git clone`
+sets `GIT_CONFIG_SYSTEM`, which its git library refuses. Install either the
+production or the DEV extension, not both: Gemini CLI keeps only one `wathba`
+skill.
+
+### Cursor
+
+Install Wathba from the Cursor Marketplace once it is listed there. Until then,
+copy `plugins/wathba` (or `plugins/wathba-dev` from the `dev-marketplace`
+branch) to `~/.cursor/plugins/local/` and run **Developer: Reload Window**,
+then sign in to the server from Cursor's MCP settings.
+
 ### Any other MCP client
 
 Add the remote MCP server URL from the table above with the Streamable HTTP
@@ -47,8 +71,8 @@ twice.
 
 ## How this repository works
 
-Nothing under `plugins/`, `.claude-plugin/`, `.agents/` or `contract.json` is
-edited by hand. They are generated from two sources:
+Nothing under `plugins/`, `.claude-plugin/`, `.cursor-plugin/`, `.agents/`,
+`skills/`, `gemini-extension.json` or `contract.json` is edited by hand. They are generated from two sources:
 
 - `plugin.config.json`: identities, origins, version, branding and listing text.
 - `src/`: the shared skill (`src/skills/wathba/SKILL.md`), the icon, and the
@@ -86,7 +110,7 @@ the language rule. `check` holds it to that:
 
 | Workflow | When | What it does |
 |---|---|---|
-| `validate` | Every PR, push to `main` or `dev`, weekly | Generator rules, version rule, then installs both builds into throwaway Claude Code and Codex homes, then checks the live OAuth metadata |
+| `validate` | Every PR, push to `main` or `dev`, weekly | Generator rules, version rule, then installs both builds into throwaway Claude Code, Codex and Gemini CLI homes, then checks the live OAuth metadata |
 | `publish-dev` | Push to `dev` | Builds the development marketplace, verifies it, and publishes it to the `dev-marketplace` branch |
 | `drift` | Daily | Checks both environments' live OAuth metadata and opens an issue when it stops matching |
 | `release` | `v*` tag on `main` | GitHub release with the plugin ZIP, then the MCP Registry entry |
@@ -117,16 +141,22 @@ production server doesn't serve yet.
 1. Open a pull request from `dev` into `main` that raises `version` in
    `plugin.config.json`. CI refuses a changed package with the same version,
    because Claude Code updates only when the version changes. Merge it:
-   production installs pick it up from `main`.
+   Claude Code and Codex installs pick it up from `main`. The Cursor
+   Marketplace publishes an update only after Cursor's own review, and a copy
+   in `~/.cursor/plugins/local/` must be copied again.
 2. Tag the merge commit `v<version>` and push the tag. `release.yml` checks that
    the tag, config and package agree, attaches the plugin ZIP, `server.json` and
    checksums to a GitHub release, then publishes `server.json` to the official
-   MCP Registry after the owner approves the `registry` environment.
+   MCP Registry after the owner approves the `registry` environment. Gemini CLI
+   installs and updates from this release (its source tarball, because the
+   release has more than one asset), so Gemini users see a change only once it
+   is tagged.
 
 A production hotfix goes into `main` by its own pull request (with a higher
 `version`); merge `main` back into `dev` right after.
 
-`listing/` holds the material for the Anthropic and OpenAI directories.
+`listing/` holds the material for the directories (Anthropic, OpenAI, Cursor,
+Gemini CLI) and what still blocks each submission.
 
 ## Acceptance
 

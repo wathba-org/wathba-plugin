@@ -4,18 +4,90 @@ Material for the public directories. Submissions happen through each
 directory's own form; nothing here is secret, and reviewer credentials never go
 in this repository.
 
-| Directory | Submit | Status |
+| Directory | Submit | Status (2026-11-24) |
 |---|---|---|
-| Official MCP Registry | `server.json`, published by `release.yml` on each `v*` tag | Automated |
-| Anthropic plugin directory (Claude Code) | This repository (`wathba@wathba` from the `wathba` marketplace) | Ready once the blockers below are cleared |
-| Anthropic Connectors Directory (Claude web, Desktop, Cowork) | Remote MCP URL `https://api.wathba.sa/mcp` | Ready once the blockers below are cleared |
-| OpenAI plugin directory (ChatGPT and Codex) | The `wathba-plugin-<version>.zip` attached to the GitHub release | Ready once the blockers below are cleared |
+| Official MCP Registry | `server.json`, published by `release.yml` on each `v*` tag | Listed (2.7.1) |
+| Anthropic plugin directory (Claude Code) | https://claude.ai/directory/manage, **Plugin bundle**: this repository, path `plugins/wathba`, branch `main` | Blocked: 1, 3, 4, 5, 7 |
+| Anthropic Connectors Directory (Claude web, Desktop, Cowork) | Same portal, **MCP connector**: `https://api.wathba.sa/mcp`; pair it with the plugin | Blocked: 1, 3, 4, 5, 7 |
+| OpenAI plugin directory (ChatGPT and Codex) | OpenAI's portal: the `wathba-plugin-<version>.zip` from the GitHub release | Blocked: 1–6 |
+| Cursor Marketplace | https://cursor.com/marketplace/publish: this repository | Blocked: 1, 4, 5, 8 |
+| Gemini CLI extensions gallery | Add the `gemini-cli-extension` topic to this repository; a daily crawl lists it | Blocked: 1, 5. Adding the topic is the submission: don't add it early |
 
-## Blockers before any directory submission
+Directories review what production serves at `https://api.wathba.sa/mcp`,
+and Gemini CLI installs from the latest GitHub release. Nothing is submitted
+until every blocker for that directory is cleared.
 
-1. A dedicated reviewer member account with a sandbox project, shared only
-   through each directory's form.
-2. Recorded acceptance runs for the hosts being listed (`docs/acceptance/`).
+## Blockers
+
+1. **Production serves an older surface.** On 2026-11-24 production ran
+   `e598736` (2026-11-11): 32 tools to the model in every host (45 in card
+   hosts), under their own names (`list_projects`, `open_wallet_top_up_card`,
+   `confirm_domain_purchase`, ...). Twenty of the 45 are not in the 2.7.1
+   tool table on `main`, the listing for that surface.
+   The four tools this listing describes are only on DEV. Submit once
+   production serves them and `main` here carries this package (its release
+   tarball is what Gemini CLI installs).
+2. **OpenAI forbids generic executors.** Guideline 6.2b: "Expose each
+   model-callable operation as a separate tool ... Do not use discovery,
+   operation selection, or schema fetching with a generic executor to enable
+   operations not individually exposed for review."
+   `wathba_execute_read_operation` and `wathba_execute_write_operation` run
+   operations found through `wathba_get_service`, which is that pattern.
+   Anthropic accepts executors split by risk (read and write are separate
+   tools here). Owner decision: leave OpenAI out for now, give its hosts one
+   tool per allowed operation, or ask OpenAI for an exception.
+3. **Money.** OpenAI allows commerce only for physical goods (5.1: no
+   "tokens, or credits") and forbids "Execution of money transfers" (5.2b).
+   Anthropic's review checklist does not accept connectors that "Transfer
+   money"; its policy (4.A) allows financial transactions with human-in-the-loop
+   safeguards. Today the surface can open a wallet top-up (the member buys
+   Wathba credit by card on Wathba's page), buy a .sa domain charged to the
+   wallet (`confirm_wathba_domain_purchase`, after an emailed code), and run
+   Live payment operations such as captures and refunds through
+   `wathba_execute_write_operation` (each after the member approves it on
+   Wathba's page). Owner decision, per directory: hide these from that
+   directory's clients, or declare them with their safeguards.
+4. **Reviewer account (production).** Sign-up is invite-only and needs a code
+   sent to a Saudi mobile, then email verification. After that, email and
+   password sign-in asks for no second factor unless the member enrolls one,
+   which meets OpenAI's "without MFA approval, email or SMS codes, magic
+   links". Invite a shared mailbox Wathba controls from the back office,
+   finish sign-up with a staff mobile, never enroll MFA, create a sandbox
+   project with sample data, and keep the wallet at 0 SAR so no purchase can
+   complete. A reviewer cannot finish an Authentica live test (it goes to the
+   member's phone) or a domain purchase (emailed code); leave both out of the
+   test cases. Credentials go only into each directory's form.
+5. **Recorded acceptance runs** (`docs/acceptance/`), on production with the
+   reviewer account, for each host a directory covers: Claude Code and Claude
+   (web) for Anthropic, ChatGPT and Codex for OpenAI, Cursor, Gemini CLI.
+   Each needs that host's account: a paid Claude plan, ChatGPT developer mode,
+   a Cursor account, and Gemini CLI on a paid Google tier or an API key (its
+   free tier moved to Antigravity CLI on 2026-06-18).
+6. **OpenAI domain check.** OpenAI's portal gives a token to serve as plain
+   text at `https://api.wathba.sa/.well-known/openai-apps-challenge` (or on
+   a parent domain). The platform has no such route yet.
+7. **Anthropic screenshots and hints.** Cards (MCP Apps) need 3–5 PNG
+   screenshots at least 1000 px wide, from the Claude acceptance run.
+   Anthropic asks for `destructiveHint: true` on tools that modify data; every
+   tool here sets all three hints, but many writes (such as
+   `create_wathba_project` and `wathba_open_flow`) set it to `false`, which a
+   reviewer may question.
+8. **Cursor lists few publishers so far.** Every plugin is reviewed by hand,
+   and Cursor says it works with "a small group of trusted partners" for now,
+   pointing others to cursor.directory.
+
+## Hosts and packages
+
+| Host | Package | Install before listing |
+|---|---|---|
+| Claude Code | `.claude-plugin/marketplace.json` → `plugins/wathba` | `/plugin marketplace add wathba-org/wathba-plugin` |
+| Codex, ChatGPT desktop | `.agents/plugins/marketplace.json` → `plugins/wathba` | `codex plugin marketplace add wathba-org/wathba-plugin` |
+| Cursor | `.cursor-plugin/marketplace.json` → `plugins/wathba` (`.cursor-plugin/plugin.json` adds the logo; Cursor finds the skill and the MCP config: its docs name `mcp.json`, its CLI reads `.mcp.json` first, and both hold the one server) | Copy `plugins/wathba` to `~/.cursor/plugins/local/` |
+| Gemini CLI | `gemini-extension.json` and `skills/wathba/` at the root | `gemini extensions install https://github.com/wathba-org/wathba-plugin` |
+
+Google's Antigravity CLI replaced Gemini CLI for free and Google One users on
+2026-06-18; its marketplace takes partners through an interest form
+(https://antigravity.google/docs/marketplace/). Not started.
 
 ## Legal pages
 
@@ -96,10 +168,37 @@ execute tools. Wathba's own operations:
 The DNS operations belong to the domain service and the API upgrade
 operations to each service a project uses; the rest belong to Wathba itself.
 
-Wathba's cards call a few more tools themselves, hidden from the model, to act
-on what the member confirms inside the card. API keys and signing secrets are
-shown to the member, never returned to the model, and approving a Live
-operation happens only on the member's signed-in Wathba page. The tools never
+### Card-only tools
+
+Hosts that draw Wathba's cards (MCP Apps: ChatGPT, Claude web and Desktop)
+also list 26 tools with `_meta.ui.visibility: ["app"]` (24 where AI calls
+are off, as in production). The model never sees
+them; the cards call them to act on what the member confirms inside the card.
+Directories review them too.
+
+| Tool | Reads or writes | Effect |
+|---|---|---|
+| `open_wathba_flow` | Member step | `wathba_open_flow` by its older name |
+| `wathba_card_action` | Write | Runs one action of the flow the card shows |
+| `list_wathba_projects`, `get_wathba_project_setup` | Read | Projects and setup, as the top-up and key cards show them |
+| `create_wathba_project` | Write | Creates the project the member named in the card |
+| `revoke_wathba_api_key` | Write (destructive) | Revokes one key after the member confirms |
+| `set_wathba_webhook_events` | Write | Sets an endpoint's event list |
+| `disable_wathba_webhook_endpoint` | Write (destructive) | Disables an endpoint after the member confirms |
+| `get_wathba_authentica_enablement`, `enable_authentica_on_wathba` | Read, write | What enabling Authentica needs; enables it (Live or sandbox simulation) |
+| `send_wathba_authentica_free_test`, `verify_wathba_authentica_live_test` | Write | Sends one free test code to the member's own phone or inbox and checks it |
+| `get_wathba_pay_enablement`, `enable_wathba_pay`, `check_wathba_pay_website`, `continue_wathba_pay_application` | Read, write | The member's Wathba Pay (Moyasar) application: read, save and submit, recheck the website, next step |
+| `get_wathba_ai_calls`, `enable_wathba_ai_calls` | Read, write | AI calls in a project (DEV only) |
+| `find_domains_on_wathba`, `list_eligible_domains_on_wathba` | Read | Domain names and the ones each identity may register |
+| `price_domain_on_wathba` | Write | One name's one-year price beside the wallet balance |
+| `prepare_wathba_domain_purchase` | Write | A quote and the registrar's identity check; charges nothing |
+| `email_wathba_domain_purchase_code` | Write | Emails the member a code bound to the price |
+| `confirm_wathba_domain_purchase` | Write (destructive) | Checks the code and the wallet, then buys the domain from the wallet |
+| `get_wathba_domain_purchase`, `list_wathba_domain_purchases` | Read | One purchase, or the project's purchases |
+
+API keys and signing secrets are shown to the member, never returned to the
+model, and approving a Live operation happens only on the member's signed-in
+Wathba page. The tools never
 fund the wallet, accept provider terms or deploy on their own. Where the
 member allowed it on the consent page, `listProjects` can show them their own
 wallet balance, read-only.

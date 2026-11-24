@@ -1,0 +1,17 @@
+{
+  "name": "wathba",
+  "owner": {
+    "name": "Wathba",
+    "email": "juriba@wathba.sa"
+  },
+  "metadata": {
+    "description": "Official Wathba plugin marketplace"
+  },
+  "plugins": [
+    {
+      "name": "wathba",
+      "source": "./plugins/wathba",
+      "description": "Connect your coding agent to Wathba over MCP: projects, notices, service docs, sandbox project creation and member-confirmed API upgrades for Saudi payments, OTP and domains."
+    }
+  ]
+}
