@@ -9,6 +9,7 @@ import { join, resolve } from "node:path";
 import { describe, test } from "node:test";
 
 import {
+  build,
   checkSkill,
   loadConfig,
   loadSources,
@@ -16,6 +17,7 @@ import {
   serviceCodesIn,
   SKILL_MAX_BYTES,
   skillFor,
+  validate,
 } from "./sync.mjs";
 
 const ROOT = resolve(import.meta.dirname, "..");
@@ -259,5 +261,90 @@ describe("the command line", () => {
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
+  });
+});
+
+// Gemini CLI installs the whole repository as one extension (manifest and
+// skills/ at the root); Cursor reads .cursor-plugin/plugin.json first.
+describe("Gemini CLI and Cursor packages", () => {
+  const versions = { prod: "9.9.9", dev: "9.9.9-dev.1" };
+
+  async function built(target) {
+    const config = await loadConfig();
+    const files = build(config, await loadSources(config), target, versions[target]);
+    return { config, files, plugin: config.targets[target].plugin };
+  }
+
+  function rejects(config, target, files, message) {
+    assert.throws(() => validate(config, target, files, versions[target]), (error) => {
+      assert.ok(error instanceof RuleError);
+      assert.match(error.message, message);
+      return true;
+    });
+  }
+
+  function edited(files, path, change) {
+    const copy = new Map(files);
+    const value = JSON.parse(copy.get(path));
+    change(value);
+    copy.set(path, `${JSON.stringify(value, null, 2)}\n`);
+    return copy;
+  }
+
+  for (const target of ["prod", "dev"]) {
+    test(`${target}: one Gemini server at its own origin, and the plugin's skill at the root`, async () => {
+      const { config, files, plugin } = await built(target);
+      const { serverKey, apiOrigin } = config.targets[target];
+      assert.deepEqual(JSON.parse(files.get("gemini-extension.json")), {
+        name: plugin,
+        version: versions[target],
+        description: JSON.parse(files.get(`plugins/${plugin}/plugin.json`)).description,
+        mcpServers: { [serverKey]: { type: "http", url: `${apiOrigin}/mcp` } },
+      });
+      assert.equal(files.get("skills/wathba/SKILL.md"), files.get(`plugins/${plugin}/skills/wathba/SKILL.md`));
+    });
+
+    test(`${target}: Cursor's manifest names the plugin and a logo inside it`, async () => {
+      const { config, files, plugin } = await built(target);
+      const cursor = JSON.parse(files.get(`plugins/${plugin}/.cursor-plugin/plugin.json`));
+      assert.equal(cursor.name, plugin);
+      assert.equal(cursor.displayName, config.targets[target].displayName);
+      assert.equal(cursor.version, versions[target]);
+      assert.ok(files.has(`plugins/${plugin}/${cursor.logo}`));
+    });
+  }
+
+  test("refuses a second Gemini server, the deprecated httpUrl, or another origin", async () => {
+    const { config, files } = await built("prod");
+    rejects(config, "prod", edited(files, "gemini-extension.json", (g) => {
+      g.mcpServers.other = { type: "http", url: "https://example.com/mcp" };
+    }), /exactly the wathba server/);
+    rejects(config, "prod", edited(files, "gemini-extension.json", (g) => {
+      g.mcpServers.wathba = { httpUrl: "https://api.wathba.sa/mcp" };
+    }), /unexpected key httpUrl/);
+    rejects(config, "prod", edited(files, "gemini-extension.json", (g) => {
+      g.mcpServers.wathba.url = "https://apidev.wathba.sa/mcp";
+    }), /must point http at https:\/\/api\.wathba\.sa\/mcp/);
+    rejects(config, "prod", edited(files, "gemini-extension.json", (g) => {
+      g.mcpServers.wathba.headers = { "X-Key": "1" };
+    }), /unexpected key headers/);
+  });
+
+  test("refuses a root skill that drifted from the plugin's", async () => {
+    const { config, files } = await built("prod");
+    const copy = new Map(files);
+    copy.set("skills/wathba/SKILL.md", `${files.get("skills/wathba/SKILL.md")}\nExtra.\n`);
+    rejects(config, "prod", copy, /root skills\/ copy/);
+  });
+
+  test("refuses a Cursor logo outside the plugin or a component path", async () => {
+    const { config, files } = await built("prod");
+    const path = "plugins/wathba/.cursor-plugin/plugin.json";
+    rejects(config, "prod", edited(files, path, (c) => {
+      c.logo = "../../src/assets/wathba-icon-light.png";
+    }), /Cursor logo/);
+    rejects(config, "prod", edited(files, path, (c) => {
+      c.mcpServers = "./mcp.json";
+    }), /unexpected key mcpServers/);
   });
 });

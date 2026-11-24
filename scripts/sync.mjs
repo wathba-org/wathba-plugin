@@ -52,11 +52,25 @@ const SECRET_MARKERS = [
   '"authorization"',
   '"Authorization"',
 ];
+// Gemini CLI installs a whole repository (or its release's source tarball)
+// as one extension: the manifest sits at the root and the skill in the root's
+// skills/ folder, a copy of the plugin's.
+const GEMINI_MANIFEST = "gemini-extension.json";
+const ROOT_SKILLS = "skills";
+// Cursor reads .cursor-plugin/plugin.json before .claude-plugin/plugin.json;
+// only this one carries the logo the Cursor marketplace shows.
+const CURSOR_MANIFEST = ".cursor-plugin/plugin.json";
+const CURSOR_LOGO = "assets/wathba-icon-light.png";
+// Cursor also reads .claude-plugin/marketplace.json, but its docs name only
+// its own file, so the repository carries both with the same entry.
+const CURSOR_MARKETPLACE = ".cursor-plugin/marketplace.json";
 // Paths the generator owns when it writes a marketplace tree.
 const MARKETPLACE_FILES = [
   ".claude-plugin/marketplace.json",
+  CURSOR_MARKETPLACE,
   ".agents/plugins/marketplace.json",
   "contract.json",
+  GEMINI_MANIFEST,
 ];
 
 export class RuleError extends Error {}
@@ -156,6 +170,22 @@ function checkListingImage(path, bytes) {
   if (bytes.length > 5 * 1024 * 1024) fail("icon", `${path} must be at most 5 MiB`);
 }
 
+// Production installs from the latest GitHub release (its source tarball,
+// since a release carries more than one asset) and updates with
+// `gemini extensions update`. DEV has no releases, and Gemini CLI's own
+// git clone fails (0.71.1 sets GIT_CONFIG_SYSTEM, which its git library
+// refuses), so DEV installs from a local clone of the branch.
+function geminiInstall(targetName, target) {
+  if (targetName === "prod")
+    return "```sh\ngemini extensions install https://github.com/wathba-org/wathba-plugin\n```";
+  return (
+    "```sh\n" +
+    `git clone --branch ${target.branch} https://github.com/wathba-org/wathba-plugin wathba-dev-extension\n` +
+    "gemini extensions install ./wathba-dev-extension\n```\n\n" +
+    `To update, pull the clone, then run \`gemini extensions update ${target.plugin}\`.`
+  );
+}
+
 function pluginReadme(config, target, mcpUrl, docsUrl, targetName) {
   const ref = targetName === "prod" ? "" : `#${target.branch}`;
   const codexRef = targetName === "prod" ? "" : ` --ref ${target.branch}`;
@@ -192,6 +222,21 @@ codex plugin add ${id}
 Installing from the app's Plugins page starts sign-in. In a terminal, run
 \`codex mcp login ${target.serverKey}\`. Codex checks the marketplace for
 updates when it starts.
+
+## Gemini CLI
+
+${geminiInstall(targetName, target)}
+
+Then run \`/mcp auth ${target.serverKey}\` in Gemini CLI and sign in.
+
+## Cursor
+
+${targetName === "prod" ? "Install Wathba from the Cursor Marketplace once it is listed there. Until then, copy" : "Copy"}
+this folder (\`plugins/${target.plugin}\` in
+\`wathba-org/wathba-plugin\`${targetName === "prod" ? "" : `, branch \`${target.branch}\``}) to
+\`~/.cursor/plugins/local/${target.plugin}\` and run **Developer: Reload
+Window**. Then sign in to the \`${target.serverKey}\` server from Cursor's MCP
+settings.
 
 ## One connection
 
@@ -292,25 +337,24 @@ function buildFiles(config, sources, targetName, version) {
         );
   const files = new Map();
 
-  files.set(
-    ".claude-plugin/marketplace.json",
-    json({
-      name: target.marketplace,
-      owner: author,
-      metadata: {
-        description: `Official ${target.marketplaceDisplayName} plugin marketplace`,
+  const marketplace = json({
+    name: target.marketplace,
+    owner: author,
+    metadata: {
+      description: `Official ${target.marketplaceDisplayName} plugin marketplace`,
+    },
+    plugins: [
+      {
+        name: target.plugin,
+        source: `./${pluginDir}`,
+        description,
+        category: config.claude.category,
+        keywords: config.keywords,
       },
-      plugins: [
-        {
-          name: target.plugin,
-          source: `./${pluginDir}`,
-          description,
-          category: config.claude.category,
-          keywords: config.keywords,
-        },
-      ],
-    }),
-  );
+    ],
+  });
+  files.set(".claude-plugin/marketplace.json", marketplace);
+  files.set(CURSOR_MARKETPLACE, marketplace);
   files.set(
     ".agents/plugins/marketplace.json",
     json({
@@ -426,7 +470,35 @@ function buildFiles(config, sources, targetName, version) {
       mcpServers: { [target.serverKey]: { type: "http", url: mcpUrl } },
     }),
   );
-  files.set(`${pluginDir}/skills/${SKILL_NAME}/SKILL.md`, skillFor(sources.skill, targetName));
+  // Cursor finds the skill and .mcp.json in the plugin folder on its own.
+  files.set(
+    `${pluginDir}/${CURSOR_MANIFEST}`,
+    json({
+      name: target.plugin,
+      displayName: target.displayName,
+      version,
+      description,
+      author,
+      homepage: docsUrl,
+      repository: config.repository,
+      license: config.license,
+      keywords: config.keywords,
+      logo: CURSOR_LOGO,
+    }),
+  );
+  files.set(
+    GEMINI_MANIFEST,
+    json({
+      name: target.plugin,
+      version,
+      description,
+      // Gemini CLI deprecated httpUrl for this pair (0.71).
+      mcpServers: { [target.serverKey]: { type: "http", url: mcpUrl } },
+    }),
+  );
+  const skill = skillFor(sources.skill, targetName);
+  files.set(`${pluginDir}/skills/${SKILL_NAME}/SKILL.md`, skill);
+  files.set(`${ROOT_SKILLS}/${SKILL_NAME}/SKILL.md`, skill);
   files.set(`${pluginDir}/assets/wathba-icon-light.png`, sources.icons[targetName].light);
   files.set(`${pluginDir}/assets/wathba-icon-dark.png`, sources.icons[targetName].dark);
   files.set(
@@ -449,7 +521,7 @@ function contentDigest(config, sources, targetName) {
   return `sha256:${hash.digest("hex")}`;
 }
 
-function build(config, sources, targetName, version) {
+export function build(config, sources, targetName, version) {
   const target = config.targets[targetName];
   const files = buildFiles(config, sources, targetName, version);
   files.set(
@@ -490,7 +562,7 @@ function exactKeys(object, allowed, where) {
     if (!allowed.includes(key)) fail("schema", `${where} has unexpected key ${key}`);
 }
 
-function validate(config, targetName, files, version) {
+export function validate(config, targetName, files, version) {
   const target = config.targets[targetName];
   const other = config.targets[targetName === "prod" ? "dev" : "prod"];
   const pluginDir = `plugins/${target.plugin}`;
@@ -509,6 +581,8 @@ function validate(config, targetName, files, version) {
     fail("identity", "Claude marketplace entry name or source differs");
   if ("version" in claudeEntry)
     fail("version", "the Claude marketplace entry must not repeat the version");
+  if (text(files, CURSOR_MARKETPLACE) !== text(files, ".claude-plugin/marketplace.json"))
+    fail("identity", "the Cursor marketplace differs from the Claude one");
 
   const codexCatalog = parse(files, ".agents/plugins/marketplace.json");
   if (codexCatalog.name !== target.marketplace || codexCatalog.plugins?.length !== 1)
@@ -554,6 +628,37 @@ function validate(config, targetName, files, version) {
     fail("identity", "Claude plugin.json name differs");
   if (claudeManifest.version !== version)
     fail("version", "Claude plugin.json version differs");
+
+  // Cursor manifest: same identity, a logo inside the plugin, and no
+  // component paths, so Cursor discovers the same skill and .mcp.json.
+  const cursorManifest = parse(files, `${pluginDir}/${CURSOR_MANIFEST}`);
+  exactKeys(
+    cursorManifest,
+    ["name", "displayName", "version", "description", "author", "homepage", "repository", "license", "keywords", "logo"],
+    `Cursor ${CURSOR_MANIFEST}`,
+  );
+  if (cursorManifest.name !== target.plugin || cursorManifest.displayName !== target.displayName)
+    fail("identity", "Cursor plugin.json name or displayName differs");
+  if (cursorManifest.version !== version) fail("version", "Cursor plugin.json version differs");
+  if (!files.has(`${pluginDir}/${cursorManifest.logo}`))
+    fail("paths", "Cursor logo must be a path inside the plugin");
+
+  // Gemini CLI extension at the root: one server by its key, nothing else.
+  const gemini = parse(files, GEMINI_MANIFEST);
+  exactKeys(gemini, ["name", "version", "description", "mcpServers"], GEMINI_MANIFEST);
+  if (gemini.name !== target.plugin) fail("identity", `${GEMINI_MANIFEST} name differs`);
+  if (gemini.version !== version) fail("version", `${GEMINI_MANIFEST} version differs`);
+  const geminiServers = Object.entries(gemini.mcpServers ?? {});
+  if (geminiServers.length !== 1 || geminiServers[0][0] !== target.serverKey)
+    fail("mcp", `${GEMINI_MANIFEST} must hold exactly the ${target.serverKey} server`);
+  exactKeys(geminiServers[0][1], ["type", "url"], `${GEMINI_MANIFEST} server`);
+  if (geminiServers[0][1].type !== "http" || geminiServers[0][1].url !== mcpUrl)
+    fail("mcp", `${GEMINI_MANIFEST} must point http at ${mcpUrl}`);
+  if (
+    text(files, `${ROOT_SKILLS}/${SKILL_NAME}/SKILL.md`) !==
+    text(files, `${pluginDir}/skills/${SKILL_NAME}/SKILL.md`)
+  )
+    fail("skill", "the root skills/ copy (Gemini CLI) differs from the plugin's skill");
 
   // MCP configs: one server, the target URL, nothing else.
   const portableMcp = parse(files, `${pluginDir}/mcp.json`);
@@ -618,7 +723,7 @@ function validate(config, targetName, files, version) {
 
 async function writeTree(outDir, files, targetName, config) {
   const target = config.targets[targetName];
-  const owned = [...MARKETPLACE_FILES, `plugins/${target.plugin}`];
+  const owned = [...MARKETPLACE_FILES, ROOT_SKILLS, `plugins/${target.plugin}`];
   if (targetName === "prod") owned.push("server.json");
   if (targetName === "dev") owned.push("README.md", "LICENSE");
   for (const path of owned) await rm(join(outDir, path), { recursive: true, force: true });
@@ -649,7 +754,10 @@ function sameBytes(a, b) {
 
 async function compareRoot(config, files) {
   const target = config.targets[config.rootTarget];
-  const committed = await readTree(ROOT, `plugins/${target.plugin}`);
+  const trees = [`plugins/${target.plugin}`, ROOT_SKILLS];
+  const committed = new Map();
+  for (const tree of trees)
+    for (const [path, value] of await readTree(ROOT, tree)) committed.set(path, value);
   const problems = [];
   for (const path of [...MARKETPLACE_FILES, "server.json"]) {
     if (!files.has(path)) continue;
@@ -658,7 +766,7 @@ async function compareRoot(config, files) {
     else if (!sameBytes(await readFile(full), files.get(path))) problems.push(`stale ${path}`);
   }
   for (const [path, value] of files) {
-    if (!path.startsWith(`plugins/${target.plugin}/`)) continue;
+    if (!trees.some((tree) => path.startsWith(`${tree}/`))) continue;
     if (!committed.has(path)) problems.push(`missing ${path}`);
     else if (!sameBytes(committed.get(path), value)) problems.push(`stale ${path}`);
   }
@@ -693,7 +801,7 @@ async function versionRule(config, base) {
     return;
   }
   const target = config.targets[config.rootTarget];
-  const paths = [...MARKETPLACE_FILES, "server.json", `plugins/${target.plugin}`];
+  const paths = [...MARKETPLACE_FILES, "server.json", ROOT_SKILLS, `plugins/${target.plugin}`];
   let changed = true;
   try {
     git("diff", "--quiet", base, "--", ...paths);

@@ -29,6 +29,7 @@ concurrency:
 env:
   CLAUDE_CODE_VERSION: "2.1.287"
   CODEX_VERSION: "0.159.2"
+  GEMINI_CLI_VERSION: "0.71.1"
 
 jobs:
   publish:
@@ -52,7 +53,7 @@ jobs:
           node-version: "24"
 
       - name: Install the host CLIs used as validators
-        run: npm install --global --no-fund --no-audit "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" "@openai/codex@${CODEX_VERSION}"
+        run: npm install --global --no-fund --no-audit "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" "@openai/codex@${CODEX_VERSION}" "@google/gemini-cli@${GEMINI_CLI_VERSION}"
 
       - name: Skip when the DEV content is unchanged
         id: digest

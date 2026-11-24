@@ -29,6 +29,23 @@ Installing from the app's Plugins page starts sign-in. In a terminal, run
 `codex mcp login wathba`. Codex checks the marketplace for
 updates when it starts.
 
+## Gemini CLI
+
+```sh
+gemini extensions install https://github.com/wathba-org/wathba-plugin
+```
+
+Then run `/mcp auth wathba` in Gemini CLI and sign in.
+
+## Cursor
+
+Install Wathba from the Cursor Marketplace once it is listed there. Until then, copy
+this folder (`plugins/wathba` in
+`wathba-org/wathba-plugin`) to
+`~/.cursor/plugins/local/wathba` and run **Developer: Reload
+Window**. Then sign in to the `wathba` server from Cursor's MCP
+settings.
+
 ## One connection
 
 Use either this plugin or a direct MCP connection to https://api.wathba.sa/mcp, not both,

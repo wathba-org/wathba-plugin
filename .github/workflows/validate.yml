@@ -21,6 +21,7 @@ concurrency:
 env:
   CLAUDE_CODE_VERSION: "2.1.287"
   CODEX_VERSION: "0.159.2"
+  GEMINI_CLI_VERSION: "0.71.1"
 
 jobs:
   # The ruleset on main requires this job name. Do not rename it.
@@ -39,7 +40,7 @@ jobs:
           node-version: "24"
 
       - name: Install the host CLIs used as validators
-        run: npm install --global --no-fund --no-audit "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" "@openai/codex@${CODEX_VERSION}"
+        run: npm install --global --no-fund --no-audit "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" "@openai/codex@${CODEX_VERSION}" "@google/gemini-cli@${GEMINI_CLI_VERSION}"
 
       - name: Unit tests for the generator rules
         run: node --test scripts/*.test.mjs
@@ -60,10 +61,10 @@ jobs:
           node scripts/sync.mjs build --target dev --out "$RUNNER_TEMP/dev"
           node scripts/sync.mjs build --target prod --out "$RUNNER_TEMP/prod"
 
-      - name: Install into Claude Code and Codex (DEV build)
+      - name: Install into Claude Code, Codex and Gemini CLI (DEV build)
         run: scripts/smoke-hosts.sh "$RUNNER_TEMP/dev" dev
 
-      - name: Install into Claude Code and Codex (production build)
+      - name: Install into Claude Code, Codex and Gemini CLI (production build)
         run: scripts/smoke-hosts.sh "$RUNNER_TEMP/prod" prod
 
       - name: MCP Registry entry is valid
