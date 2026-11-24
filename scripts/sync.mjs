@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Builds the Wathba agent plugin marketplaces from plugin.config.json and src/,
-// and enforces the packaging rules. No dependencies; Node 24.
+// and enforces the packaging rules. No dependencies; Node 26.
 //
 //   node scripts/sync.mjs build --target dev|prod --out <dir> [--version <v>]
 //   node scripts/sync.mjs check
