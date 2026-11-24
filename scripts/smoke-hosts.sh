@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Installs one built marketplace tree into throwaway Claude Code, Codex and
 # Gemini CLI homes and checks what each host actually loaded. All three CLIs
-# must be on PATH; a missing CLI fails the run. Cursor needs a signed-in
-# account to load a plugin, so its manifest is checked only by sync.mjs.
+# must be on PATH; a missing CLI fails the run. The Cursor CLI runs an agent
+# only for a signed-in account, so Cursor's files are checked by sync.mjs alone.
 #
 #   scripts/smoke-hosts.sh <marketplace-dir> <dev|prod>
 set -euo pipefail
@@ -71,7 +71,12 @@ jq -e --arg p "$plugin" --arg v "$version" --arg s "$server" --arg u "$url" '
 ' "$extension/gemini-extension.json" >/dev/null || { cat "$extension/gemini-extension.json"; exit 1; }
 cmp -s "$extension/skills/wathba/SKILL.md" "$tree/plugins/$plugin/skills/wathba/SKILL.md" \
   || { echo "Gemini CLI did not install the wathba skill" >&2; exit 1; }
-(cd "$work/gemini-cwd" && gemini mcp list 2>&1) >"$work/gemini-mcp.txt"
+(cd "$work/gemini-cwd" && gemini skills list 2>&1) >"$work/gemini-skills.txt" \
+  || { cat "$work/gemini-skills.txt"; exit 1; }
+grep -qx "wathba \[Enabled\]" "$work/gemini-skills.txt" \
+  || { cat "$work/gemini-skills.txt"; echo "Gemini CLI did not load the wathba skill" >&2; exit 1; }
+(cd "$work/gemini-cwd" && gemini mcp list 2>&1) >"$work/gemini-mcp.txt" \
+  || { cat "$work/gemini-mcp.txt"; exit 1; }
 [[ "$(grep -c " (from " "$work/gemini-mcp.txt")" == 1 ]] \
   && grep -qF "$server (from $plugin): $url (http)" "$work/gemini-mcp.txt" \
   || { cat "$work/gemini-mcp.txt"; echo "Gemini CLI does not list exactly one $server server at $url" >&2; exit 1; }

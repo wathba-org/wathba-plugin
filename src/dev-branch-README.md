@@ -34,7 +34,8 @@ gemini extensions install ./wathba-dev-extension
 ```
 
 Then run `/mcp auth wathba-dev` in Gemini CLI and sign in. To update, pull the
-clone, then run `gemini extensions update wathba-dev`.
+clone, then run `gemini extensions update wathba-dev`. Install either this or
+the production extension, not both: Gemini CLI keeps only one `wathba` skill.
 
 ## Cursor
 

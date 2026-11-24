@@ -57,13 +57,23 @@ const SECRET_MARKERS = [
 // skills/ folder, a copy of the plugin's.
 const GEMINI_MANIFEST = "gemini-extension.json";
 const ROOT_SKILLS = "skills";
-// Cursor reads .cursor-plugin/plugin.json before .claude-plugin/plugin.json;
-// only this one carries the logo the Cursor marketplace shows.
+// Cursor's own manifest and marketplace, in the shapes of its published
+// schemas (github.com/cursor/plugins, schemas/*.schema.json), which refuse
+// any key they don't list: author and owner hold only name and email, and a
+// marketplace entry only name, source and description. The manifest carries
+// the logo Cursor shows; Cursor finds the skill and the MCP config itself.
 const CURSOR_MANIFEST = ".cursor-plugin/plugin.json";
 const CURSOR_LOGO = "assets/wathba-icon-light.png";
-// Cursor also reads .claude-plugin/marketplace.json, but its docs name only
-// its own file, so the repository carries both with the same entry.
 const CURSOR_MARKETPLACE = ".cursor-plugin/marketplace.json";
+const CURSOR_MANIFEST_KEYS = [
+  "name", "displayName", "version", "description", "author", "homepage", "repository", "license", "keywords", "logo",
+];
+// Root paths Gemini CLI or Cursor would load from this repository besides
+// the generated ones (a context file, commands, hooks, agents, policies, a
+// root plugin). `check` refuses them, so nothing ships outside these rules.
+const UNOWNED_HOST_PATHS = [
+  "GEMINI.md", "commands", "hooks", "agents", "policies", "plugin.json", ".cursor-plugin/plugin.json",
+];
 // Paths the generator owns when it writes a marketplace tree.
 const MARKETPLACE_FILES = [
   ".claude-plugin/marketplace.json",
@@ -177,12 +187,18 @@ function checkListingImage(path, bytes) {
 // refuses), so DEV installs from a local clone of the branch.
 function geminiInstall(targetName, target) {
   if (targetName === "prod")
-    return "```sh\ngemini extensions install https://github.com/wathba-org/wathba-plugin\n```";
+    return (
+      "```sh\ngemini extensions install https://github.com/wathba-org/wathba-plugin\n```\n\n" +
+      "Gemini CLI installs the latest GitHub release, not `main`, and updates with\n" +
+      "`gemini extensions update wathba`."
+    );
   return (
     "```sh\n" +
     `git clone --branch ${target.branch} https://github.com/wathba-org/wathba-plugin wathba-dev-extension\n` +
     "gemini extensions install ./wathba-dev-extension\n```\n\n" +
-    `To update, pull the clone, then run \`gemini extensions update ${target.plugin}\`.`
+    `To update, pull the clone, then run \`gemini extensions update ${target.plugin}\`.\n` +
+    "Install either this or the production extension, not both: Gemini CLI keeps\n" +
+    "only one `wathba` skill."
   );
 }
 
@@ -194,8 +210,8 @@ function pluginReadme(config, target, mcpUrl, docsUrl, targetName) {
     targetName === "prod" ? "Wathba" : "the Wathba development environment";
   return `# ${target.displayName}
 
-Connects Codex, Claude Code and other Agent Plugins clients to ${environment}
-over MCP. The member signs in through the browser (OAuth); no API key or token
+Connects Codex, Claude Code, Cursor, Gemini CLI and other Agent Plugins
+clients to ${environment} over MCP. The member signs in through the browser (OAuth); no API key or token
 ever goes through the chat.
 
 - MCP server: ${mcpUrl}
@@ -354,7 +370,17 @@ function buildFiles(config, sources, targetName, version) {
     ],
   });
   files.set(".claude-plugin/marketplace.json", marketplace);
-  files.set(CURSOR_MARKETPLACE, marketplace);
+  files.set(
+    CURSOR_MARKETPLACE,
+    json({
+      name: target.marketplace,
+      owner: { name: config.publisher.name, email: config.publisher.email },
+      metadata: {
+        description: `Official ${target.marketplaceDisplayName} plugin marketplace`,
+      },
+      plugins: [{ name: target.plugin, source: `./${pluginDir}`, description }],
+    }),
+  );
   files.set(
     ".agents/plugins/marketplace.json",
     json({
@@ -470,7 +496,8 @@ function buildFiles(config, sources, targetName, version) {
       mcpServers: { [target.serverKey]: { type: "http", url: mcpUrl } },
     }),
   );
-  // Cursor finds the skill and .mcp.json in the plugin folder on its own.
+  // Cursor's docs name mcp.json (the Agent Plugins file above); its CLI
+  // (2026.11.22) reads .mcp.json first. Both hold the same one server.
   files.set(
     `${pluginDir}/${CURSOR_MANIFEST}`,
     json({
@@ -478,7 +505,7 @@ function buildFiles(config, sources, targetName, version) {
       displayName: target.displayName,
       version,
       description,
-      author,
+      author: { name: config.publisher.name, email: config.publisher.email },
       homepage: docsUrl,
       repository: config.repository,
       license: config.license,
@@ -581,8 +608,14 @@ export function validate(config, targetName, files, version) {
     fail("identity", "Claude marketplace entry name or source differs");
   if ("version" in claudeEntry)
     fail("version", "the Claude marketplace entry must not repeat the version");
-  if (text(files, CURSOR_MARKETPLACE) !== text(files, ".claude-plugin/marketplace.json"))
-    fail("identity", "the Cursor marketplace differs from the Claude one");
+  const cursorCatalog = parse(files, CURSOR_MARKETPLACE);
+  exactKeys(cursorCatalog, ["name", "owner", "metadata", "plugins"], CURSOR_MARKETPLACE);
+  exactKeys(cursorCatalog.owner ?? {}, ["name", "email"], `${CURSOR_MARKETPLACE} owner`);
+  if (cursorCatalog.name !== target.marketplace || cursorCatalog.plugins?.length !== 1)
+    fail("identity", "Cursor marketplace name or plugin count differs");
+  exactKeys(cursorCatalog.plugins[0], ["name", "source", "description"], `${CURSOR_MARKETPLACE} entry`);
+  if (cursorCatalog.plugins[0].name !== target.plugin || cursorCatalog.plugins[0].source !== `./${pluginDir}`)
+    fail("identity", "Cursor marketplace entry name or source differs");
 
   const codexCatalog = parse(files, ".agents/plugins/marketplace.json");
   if (codexCatalog.name !== target.marketplace || codexCatalog.plugins?.length !== 1)
@@ -632,11 +665,8 @@ export function validate(config, targetName, files, version) {
   // Cursor manifest: same identity, a logo inside the plugin, and no
   // component paths, so Cursor discovers the same skill and .mcp.json.
   const cursorManifest = parse(files, `${pluginDir}/${CURSOR_MANIFEST}`);
-  exactKeys(
-    cursorManifest,
-    ["name", "displayName", "version", "description", "author", "homepage", "repository", "license", "keywords", "logo"],
-    `Cursor ${CURSOR_MANIFEST}`,
-  );
+  exactKeys(cursorManifest, CURSOR_MANIFEST_KEYS, `Cursor ${CURSOR_MANIFEST}`);
+  exactKeys(cursorManifest.author ?? {}, ["name", "email"], `Cursor ${CURSOR_MANIFEST} author`);
   if (cursorManifest.name !== target.plugin || cursorManifest.displayName !== target.displayName)
     fail("identity", "Cursor plugin.json name or displayName differs");
   if (cursorManifest.version !== version) fail("version", "Cursor plugin.json version differs");
@@ -759,6 +789,9 @@ async function compareRoot(config, files) {
   for (const tree of trees)
     for (const [path, value] of await readTree(ROOT, tree)) committed.set(path, value);
   const problems = [];
+  for (const path of UNOWNED_HOST_PATHS)
+    if (!files.has(path) && existsSync(join(ROOT, path)))
+      problems.push(`unexpected ${path}: Gemini CLI or Cursor would load it from the repository root`);
   for (const path of [...MARKETPLACE_FILES, "server.json"]) {
     if (!files.has(path)) continue;
     const full = join(ROOT, path);

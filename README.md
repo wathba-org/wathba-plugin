@@ -50,7 +50,9 @@ that carries `gemini-extension.json`. Update with
 `dev-marketplace` branch and install the clone's folder
 (`gemini extensions install ./<folder>`, extension `wathba-dev`). Gemini CLI
 0.71.1's own `--ref` install failed when tried on 2026-11-24: its `git clone`
-sets `GIT_CONFIG_SYSTEM`, which its git library refuses.
+sets `GIT_CONFIG_SYSTEM`, which its git library refuses. Install either the
+production or the DEV extension, not both: Gemini CLI keeps only one `wathba`
+skill.
 
 ### Cursor
 
@@ -139,11 +141,14 @@ production server doesn't serve yet.
 1. Open a pull request from `dev` into `main` that raises `version` in
    `plugin.config.json`. CI refuses a changed package with the same version,
    because Claude Code updates only when the version changes. Merge it:
-   production installs pick it up from `main`.
+   Claude Code, Codex and Cursor installs pick it up from `main`.
 2. Tag the merge commit `v<version>` and push the tag. `release.yml` checks that
    the tag, config and package agree, attaches the plugin ZIP, `server.json` and
    checksums to a GitHub release, then publishes `server.json` to the official
-   MCP Registry after the owner approves the `registry` environment.
+   MCP Registry after the owner approves the `registry` environment. Gemini CLI
+   installs and updates from this release (its source tarball, because the
+   release has more than one asset), so Gemini users see a change only once it
+   is tagged.
 
 A production hotfix goes into `main` by its own pull request (with a higher
 `version`); merge `main` back into `dev` right after.

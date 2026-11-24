@@ -22,8 +22,8 @@ until every blocker for that directory is cleared.
 1. **Production serves an older surface.** On 2026-11-24 production ran
    `e598736` (2026-11-11): 32 tools to the model in every host (45 in card
    hosts), under their own names (`list_projects`, `open_wallet_top_up_card`,
-   `confirm_domain_purchase`, ...). Twenty of the 45 are in no listing
-   table.
+   `confirm_domain_purchase`, ...). Twenty of the 45 are not in the 2.7.1
+   tool table on `main`, the listing for that surface.
    The four tools this listing describes are only on DEV. Submit once
    production serves them and `main` here carries this package (its release
    tarball is what Gemini CLI installs).
@@ -82,7 +82,7 @@ until every blocker for that directory is cleared.
 |---|---|---|
 | Claude Code | `.claude-plugin/marketplace.json` → `plugins/wathba` | `/plugin marketplace add wathba-org/wathba-plugin` |
 | Codex, ChatGPT desktop | `.agents/plugins/marketplace.json` → `plugins/wathba` | `codex plugin marketplace add wathba-org/wathba-plugin` |
-| Cursor | `.cursor-plugin/marketplace.json` → `plugins/wathba` (`.cursor-plugin/plugin.json` adds the logo; Cursor finds the skill and `.mcp.json`) | Copy `plugins/wathba` to `~/.cursor/plugins/local/` |
+| Cursor | `.cursor-plugin/marketplace.json` → `plugins/wathba` (`.cursor-plugin/plugin.json` adds the logo; Cursor finds the skill and the MCP config: its docs name `mcp.json`, its CLI reads `.mcp.json` first, and both hold the one server) | Copy `plugins/wathba` to `~/.cursor/plugins/local/` |
 | Gemini CLI | `gemini-extension.json` and `skills/wathba/` at the root | `gemini extensions install https://github.com/wathba-org/wathba-plugin` |
 
 Google's Antigravity CLI replaced Gemini CLI for free and Google One users on

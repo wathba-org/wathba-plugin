@@ -3,7 +3,7 @@
 
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, rmSync, symlinkSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { describe, test } from "node:test";
@@ -337,6 +337,60 @@ describe("Gemini CLI and Cursor packages", () => {
     rejects(config, "prod", copy, /root skills\/ copy/);
   });
 
+  // Key lists copied from Cursor's published schemas (github.com/cursor/plugins,
+  // schemas/plugin.schema.json and marketplace.schema.json, read 2026-11-24),
+  // which set additionalProperties: false.
+  const CURSOR_SCHEMA = {
+    plugin: ["name", "displayName", "description", "version", "minClientVersions", "author", "publisher",
+      "homepage", "repository", "license", "logo", "keywords", "category", "tags", "commands", "agents",
+      "skills", "rules", "hooks", "variables", "mcpServers"],
+    person: ["name", "email"],
+    marketplace: ["name", "owner", "metadata", "plugins"],
+    entry: ["name", "source", "description", "minClientVersions"],
+  };
+  const only = (object, keys) =>
+    assert.deepEqual(Object.keys(object).filter((key) => !keys.includes(key)), []);
+
+  for (const target of ["prod", "dev"]) {
+    test(`${target}: Cursor's files use only the keys Cursor's schemas allow`, async () => {
+      const { files, plugin } = await built(target);
+      const manifest = JSON.parse(files.get(`plugins/${plugin}/.cursor-plugin/plugin.json`));
+      only(manifest, CURSOR_SCHEMA.plugin);
+      only(manifest.author, CURSOR_SCHEMA.person);
+      const catalog = JSON.parse(files.get(".cursor-plugin/marketplace.json"));
+      only(catalog, CURSOR_SCHEMA.marketplace);
+      only(catalog.owner, CURSOR_SCHEMA.person);
+      for (const entry of catalog.plugins) only(entry, CURSOR_SCHEMA.entry);
+    });
+  }
+
+  test("refuses a Cursor marketplace with keys or an identity Cursor's schema or the target don't allow", async () => {
+    const { config, files } = await built("prod");
+    const path = ".cursor-plugin/marketplace.json";
+    rejects(config, "prod", edited(files, path, (m) => { m.owner.url = "https://wathba.sa"; }), /owner has unexpected key url/);
+    rejects(config, "prod", edited(files, path, (m) => { m.description = "Wathba"; }), /marketplace.json has unexpected key description/);
+    rejects(config, "prod", edited(files, path, (m) => { m.plugins[0].category = "developer-tools"; }), /entry has unexpected key category/);
+    rejects(config, "prod", edited(files, path, (m) => { m.name = "wathba-development"; }), /Cursor marketplace name or plugin count/);
+    rejects(config, "prod", edited(files, path, (m) => { m.plugins.push({ ...m.plugins[0] }); }), /Cursor marketplace name or plugin count/);
+    rejects(config, "prod", edited(files, path, (m) => { m.plugins[0].source = "./plugins/other"; }), /Cursor marketplace entry name or source/);
+  });
+
+  test("refuses a Cursor manifest with another identity, version or author shape", async () => {
+    const { config, files } = await built("prod");
+    const path = "plugins/wathba/.cursor-plugin/plugin.json";
+    rejects(config, "prod", edited(files, path, (c) => { c.name = "wathba-dev"; }), /Cursor plugin.json name or displayName/);
+    rejects(config, "prod", edited(files, path, (c) => { c.displayName = "Wathba Dev"; }), /Cursor plugin.json name or displayName/);
+    rejects(config, "prod", edited(files, path, (c) => { c.version = "0.0.1"; }), /Cursor plugin.json version/);
+    rejects(config, "prod", edited(files, path, (c) => { c.author.url = "https://wathba.sa"; }), /author has unexpected key url/);
+  });
+
+  test("refuses a Gemini manifest with another name, version or an extra key", async () => {
+    const { config, files } = await built("prod");
+    rejects(config, "prod", edited(files, "gemini-extension.json", (g) => { g.name = "wathba-dev"; }), /gemini-extension.json name/);
+    rejects(config, "prod", edited(files, "gemini-extension.json", (g) => { g.version = "0.0.1"; }), /gemini-extension.json version/);
+    rejects(config, "prod", edited(files, "gemini-extension.json", (g) => { g.contextFileName = "GEMINI.md"; }), /unexpected key contextFileName/);
+  });
+
   test("refuses a Cursor logo outside the plugin or a component path", async () => {
     const { config, files } = await built("prod");
     const path = "plugins/wathba/.cursor-plugin/plugin.json";
@@ -347,4 +401,96 @@ describe("Gemini CLI and Cursor packages", () => {
       c.mcpServers = "./mcp.json";
     }), /unexpected key mcpServers/);
   });
+});
+
+// `check`, `build` and `version-rule` against a copy of this repository, so
+// the root comparison, the owned paths and the version gate are exercised as
+// CI runs them.
+describe("the committed root", () => {
+  function copy() {
+    const dir = mkdtempSync(join(tmpdir(), "wathba-root-"));
+    cpSync(ROOT, dir, {
+      recursive: true,
+      filter: (source) => !/[\\/](\.git|node_modules)$/.test(source),
+    });
+    return dir;
+  }
+
+  function run(dir, ...args) {
+    try {
+      execFileSync(process.execPath, [join(dir, "scripts/sync.mjs"), ...args], { cwd: dir, encoding: "utf8", stdio: "pipe" });
+      return "";
+    } catch (error) {
+      return `${error.stderr}`;
+    }
+  }
+
+  const cases = [
+    ["a missing root skill", (dir) => rmSync(join(dir, "skills/wathba/SKILL.md")), /missing skills\/wathba\/SKILL.md/],
+    ["an extra root skill", (dir) => {
+      mkdirSync(join(dir, "skills/other"), { recursive: true });
+      writeFileSync(join(dir, "skills/other/SKILL.md"), "---\nname: other\n---\n");
+    }, /unexpected skills\/other\/SKILL.md/],
+    ["a stale Gemini manifest", (dir) => writeFileSync(join(dir, "gemini-extension.json"), "{}\n"), /stale gemini-extension.json/],
+    ["a stale Cursor marketplace", (dir) => writeFileSync(join(dir, ".cursor-plugin/marketplace.json"), "{}\n"), /stale .cursor-plugin\/marketplace.json/],
+    ["a root GEMINI.md", (dir) => writeFileSync(join(dir, "GEMINI.md"), "# notes\n"), /unexpected GEMINI.md/],
+    ["a root hooks folder", (dir) => {
+      mkdirSync(join(dir, "hooks"));
+      writeFileSync(join(dir, "hooks/hooks.json"), "{}\n");
+    }, /unexpected hooks/],
+    ["a root Cursor manifest", (dir) => writeFileSync(join(dir, ".cursor-plugin/plugin.json"), "{}\n"), /unexpected .cursor-plugin\/plugin.json/],
+  ];
+
+  test("passes on an untouched copy", () => {
+    const dir = copy();
+    try {
+      assert.equal(run(dir, "check"), "");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  for (const [name, change, message] of cases)
+    test(`check refuses ${name}`, () => {
+      const dir = copy();
+      try {
+        change(dir);
+        assert.match(run(dir, "check"), message);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+  test("build replaces a stale root skills/ folder", () => {
+    const dir = copy();
+    try {
+      mkdirSync(join(dir, "skills/old"), { recursive: true });
+      writeFileSync(join(dir, "skills/old/SKILL.md"), "old\n");
+      writeFileSync(join(dir, "skills/wathba/SKILL.md"), "stale\n");
+      execFileSync(process.execPath, [join(dir, "scripts/sync.mjs"), "build", "--target", "prod", "--out", dir], { stdio: "pipe" });
+      assert.equal(existsSync(join(dir, "skills/old")), false);
+      assert.equal(
+        readFileSync(join(dir, "skills/wathba/SKILL.md"), "utf8"),
+        readFileSync(join(dir, "plugins/wathba/skills/wathba/SKILL.md"), "utf8"),
+      );
+      assert.equal(run(dir, "check"), "");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  for (const [name, path] of [["the root skill", "skills/wathba/SKILL.md"], ["the Gemini manifest", "gemini-extension.json"], ["the Cursor marketplace", ".cursor-plugin/marketplace.json"]])
+    test(`version-rule asks for a new version when only ${name} changes`, () => {
+      const dir = copy();
+      try {
+        const git = (...args) => execFileSync("git", ["-c", "user.name=t", "-c", "user.email=t@example.com", ...args], { cwd: dir, stdio: "pipe" });
+        git("init", "-q");
+        git("add", "-A");
+        git("commit", "-q", "-m", "base");
+        writeFileSync(join(dir, path), `${readFileSync(join(dir, path), "utf8")}\n`);
+        assert.match(run(dir, "version-rule", "--base", "HEAD"), /is not greater than/);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    });
 });

@@ -1,7 +1,7 @@
 # Wathba
 
-Connects Codex, Claude Code and other Agent Plugins clients to Wathba
-over MCP. The member signs in through the browser (OAuth); no API key or token
+Connects Codex, Claude Code, Cursor, Gemini CLI and other Agent Plugins
+clients to Wathba over MCP. The member signs in through the browser (OAuth); no API key or token
 ever goes through the chat.
 
 - MCP server: https://api.wathba.sa/mcp
@@ -34,6 +34,9 @@ updates when it starts.
 ```sh
 gemini extensions install https://github.com/wathba-org/wathba-plugin
 ```
+
+Gemini CLI installs the latest GitHub release, not `main`, and updates with
+`gemini extensions update wathba`.
 
 Then run `/mcp auth wathba` in Gemini CLI and sign in.
 

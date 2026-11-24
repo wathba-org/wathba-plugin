@@ -2,8 +2,7 @@
   "name": "wathba",
   "owner": {
     "name": "Wathba",
-    "email": "juriba@wathba.sa",
-    "url": "https://wathba.sa"
+    "email": "juriba@wathba.sa"
   },
   "metadata": {
     "description": "Official Wathba plugin marketplace"
@@ -12,16 +11,7 @@
     {
       "name": "wathba",
       "source": "./plugins/wathba",
-      "description": "Connect your coding agent to Wathba over MCP: projects, notices, service docs, sandbox project creation and member-confirmed API upgrades for Saudi payments, OTP and domains.",
-      "category": "developer-tools",
-      "keywords": [
-        "wathba",
-        "وثبة",
-        "mcp",
-        "payments",
-        "otp",
-        "domains"
-      ]
+      "description": "Connect your coding agent to Wathba over MCP: projects, notices, service docs, sandbox project creation and member-confirmed API upgrades for Saudi payments, OTP and domains."
     }
   ]
 }
