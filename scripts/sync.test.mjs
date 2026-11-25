@@ -365,15 +365,16 @@ describe("the server's skill", () => {
 
   test("pull writes nothing when the rules refuse the server's skill", () => {
     const current = readFileSync(join(ROOT, "src/skills/wathba/SKILL.md"), "utf8");
-    // Under the byte cap, so the service-code rule is the one that refuses it.
+    // The same length as the heading it replaces, so the service-code rule,
+    // not the byte cap, is the one that refuses it, however full the skill is.
     assert.ok(current.includes("\n# Wathba\n"));
-    const platform = platformWith(current.replace("\n# Wathba\n", "\n# payments.moyasar\n"));
+    const platform = platformWith(current.replace("\n# Wathba\n", "\n# pay.mo\n"));
     const { dir, run } = pluginCopy();
     const before = ["plugin.config.json", "src/skills/wathba/SKILL.md", "skills/wathba/SKILL.md"].map((path) =>
       readFileSync(join(dir, path), "utf8"),
     );
     try {
-      assert.throws(() => run("pull", "--from", platform, "--ref", "HEAD"), /names payments\.moyasar/);
+      assert.throws(() => run("pull", "--from", platform, "--ref", "HEAD"), /names pay\.mo,/);
       const after = ["plugin.config.json", "src/skills/wathba/SKILL.md", "skills/wathba/SKILL.md"].map((path) =>
         readFileSync(join(dir, path), "utf8"),
       );
