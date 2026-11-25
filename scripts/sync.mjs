@@ -6,12 +6,25 @@
 //   node scripts/sync.mjs check
 //   node scripts/sync.mjs digest --target dev|prod
 //   node scripts/sync.mjs version-rule --base <git-ref>
+//   node scripts/sync.mjs pull [--from <wathba-platform checkout>] [--ref <git-ref>]
+//   node scripts/sync.mjs verify-upstream [--from <wathba-platform checkout>] [--ref <git-ref>]
 //
 // `build` writes one complete marketplace tree. Writing into the repository
 // root replaces only the generated paths. `check` builds both targets in
 // memory, validates them, and (once config.rootTarget is set) requires the
 // committed root output to equal a fresh build. The rules are unit tested in
 // sync.test.mjs (`node --test scripts/*.test.mjs`).
+//
+// The skill is Wathba's server's: wathba-platform serves
+// skill.upstream.path to every host that loads skills from an MCP server.
+// `pull` copies that file into skill.source, records its sha256 in
+// plugin.config.json and rebuilds the root output; every other command
+// refuses a skill.source whose sha256 is not the recorded one, so the
+// plugin's copy is never edited by hand. `verify-upstream` compares the
+// recorded sha256 with the upstream file without writing anything. Both
+// read the file from a wathba-platform checkout (`--from`, default ref
+// origin/<skill.upstream.ref>) or from GitHub (the repository is private:
+// GH_TOKEN, GITHUB_TOKEN or `gh auth token`).
 
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -130,7 +143,36 @@ export async function loadConfig() {
   // must always compare against it, so the field cannot be dropped.
   if (config.rootTarget !== "prod")
     fail("config", 'rootTarget must be "prod"');
+  const upstream = config.skill?.upstream;
+  if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(upstream?.repository ?? ""))
+    fail("config", "skill.upstream.repository must be owner/name");
+  if (typeof upstream.ref !== "string" || upstream.ref === "")
+    fail("config", "skill.upstream.ref must name the branch the server deploys from");
+  if (
+    typeof upstream.path !== "string" ||
+    !upstream.path.endsWith(`/${SKILL_NAME}/SKILL.md`) ||
+    upstream.path.startsWith("/") ||
+    upstream.path.split("/").includes("..")
+  )
+    fail("config", `skill.upstream.path must be a relative path ending in ${SKILL_NAME}/SKILL.md`);
+  if (!/^[0-9a-f]{64}$/.test(upstream.sha256 ?? ""))
+    fail("config", "skill.upstream.sha256 must be a hex sha256");
   return config;
+}
+
+/**
+ * The plugin ships the server's skill byte for byte: refuses a skill.source
+ * whose sha256 is not the one `pull` recorded, so an edit by hand fails every
+ * command instead of drifting from what the server serves.
+ */
+export function checkUpstreamCopy(bytes, config) {
+  const { repository, path, sha256: recorded } = config.skill.upstream;
+  if (sha256(bytes) !== recorded)
+    fail(
+      "skill",
+      `${config.skill.source} is not the skill Wathba's server serves (its sha256 is not ` +
+        `skill.upstream.sha256): edit ${path} in ${repository}, then run \`node scripts/sync.mjs pull\``,
+    );
 }
 
 // A target may override the subtitle and icons (DEV carries a DEV badge).
@@ -147,7 +189,8 @@ function composerIconThemeFor(config, targetName) {
   return config.targets[targetName].composerIconTheme ?? "light";
 }
 
-export async function loadSources(config) {
+/** `skillBytes` stands in for skill.source (pull checks a new skill before writing it). */
+export async function loadSources(config, skillBytes) {
   const icons = {};
   for (const name of ["prod", "dev"]) {
     icons[name] = {};
@@ -160,7 +203,11 @@ export async function loadSources(config) {
       icons[name][theme] = bytes;
     }
   }
-  const skill = await readFile(join(ROOT, config.skill.source), "utf8");
+  const bytes = skillBytes ?? (await readFile(join(ROOT, config.skill.source)));
+  checkUpstreamCopy(bytes, config);
+  const skill = bytes.toString("utf8");
+  // The server sends these exact bytes, and a host checks their digest.
+  if (!Buffer.from(skill, "utf8").equals(bytes)) fail("skill", "SKILL.md is not UTF-8");
   const devReadme = await readFile(join(ROOT, "src/dev-branch-README.md"), "utf8");
   const license = await readFile(join(ROOT, "LICENSE"), "utf8");
   return { icons, skill, devReadme, license };
@@ -264,17 +311,6 @@ or every Wathba tool appears twice.
 }
 
 // Returns Map<relativePath, Buffer|string> for one marketplace tree.
-/**
- * Parts of the skill for features only DEV has sit between
- * `<!-- dev-only... -->` and `<!-- /dev-only -->` lines: DEV keeps the text
- * without the markers, prod drops the whole block.
- */
-const DEV_ONLY_BLOCK = /^[ \t]*<!-- dev-only[^\n]*-->\n([\s\S]*?)^[ \t]*<!-- \/dev-only -->\n/gm;
-
-export function skillFor(skill, targetName) {
-  return skill.replace(DEV_ONLY_BLOCK, (_, body) => (targetName === "prod" ? "" : body));
-}
-
 // Dotted names the skill may use that have a service code's shape: the app
 // files an agent reads to learn the stack, and paths into the fields of a
 // Wathba result. Both lists are closed on purpose: a list in the config, or
@@ -330,8 +366,15 @@ export function checkSkill(skill, config, targetName) {
       fail("skill", `declared tool ${tool} does not appear in SKILL.md`);
   if (/\bwathba (login|skill|mcp|install|integrate)\b/i.test(skill) || /npm install/i.test(skill))
     fail("skill", "the shared skill must not depend on the Wathba CLI");
-  if (skill.includes("dev-only"))
-    fail("skill", "a dev-only marker is unbalanced, so it reached the package");
+  // The skill used to keep DEV-only text between these markers. The server
+  // sends one SKILL.md to DEV and production, so the plugin can't differ by
+  // environment either: a marker would reach hosts as text.
+  if (/<!--\s*\/?dev-only/.test(skill))
+    fail(
+      "skill",
+      "SKILL.md has a dev-only marker: Wathba's server sends one skill to DEV and production, " +
+        "so the skill can't differ by environment",
+    );
   if (targetName === "prod" && /\bAI calls?\b|ai_calls|calls\.ai/i.test(skill))
     fail("skill", "the prod skill mentions AI calls, which only DEV has");
 }
@@ -525,9 +568,8 @@ function buildFiles(config, sources, targetName, version) {
       mcpServers: { [target.serverKey]: { type: "http", url: mcpUrl } },
     }),
   );
-  const skill = skillFor(sources.skill, targetName);
-  files.set(`${pluginDir}/skills/${SKILL_NAME}/SKILL.md`, skill);
-  files.set(`${ROOT_SKILLS}/${SKILL_NAME}/SKILL.md`, skill);
+  files.set(`${pluginDir}/skills/${SKILL_NAME}/SKILL.md`, sources.skill);
+  files.set(`${ROOT_SKILLS}/${SKILL_NAME}/SKILL.md`, sources.skill);
   files.set(`${pluginDir}/assets/wathba-icon-light.png`, sources.icons[targetName].light);
   files.set(`${pluginDir}/assets/wathba-icon-dark.png`, sources.icons[targetName].dark);
   files.set(
@@ -860,6 +902,98 @@ async function versionRule(config, base) {
   console.log(`version-rule: ${baseVersion} -> ${config.version}`);
 }
 
+const GITHUB_API = "https://api.github.com";
+
+function githubToken(repository) {
+  const fromEnv = process.env.GH_TOKEN || process.env.GITHUB_TOKEN;
+  if (fromEnv) return fromEnv;
+  try {
+    return execFileSync("gh", ["auth", "token"], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+  } catch {
+    fail(
+      "pull",
+      `${repository} is private: sign in with \`gh auth login\`, set GH_TOKEN, ` +
+        "or pass --from <wathba-platform checkout>",
+    );
+  }
+}
+
+/**
+ * The server's skill file: from a wathba-platform checkout's git objects
+ * (`from`, at `ref`, default origin/<upstream.ref>, so a dirty working tree
+ * is never copied), or from GitHub's contents API at `ref` (default
+ * upstream.ref). Returns { bytes, at }, `at` naming what was read.
+ */
+export async function fetchUpstreamSkill(upstream, { from, ref, token, fetchImpl = fetch } = {}) {
+  if (from !== undefined) {
+    const revision = ref ?? `origin/${upstream.ref}`;
+    const checkout = resolve(from);
+    try {
+      const bytes = execFileSync("git", ["-C", checkout, "show", `${revision}:${upstream.path}`], {
+        maxBuffer: 16 * 1024 * 1024,
+        stdio: ["ignore", "pipe", "pipe"],
+      });
+      const commit = execFileSync("git", ["-C", checkout, "rev-parse", "--short", revision], {
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "pipe"],
+      }).trim();
+      return { bytes, at: `${checkout} ${revision} (${commit})` };
+    } catch (error) {
+      fail("pull", `can't read ${revision}:${upstream.path} in ${checkout}: ${String(error.stderr ?? error.message).trim()}`);
+    }
+  }
+  const revision = ref ?? upstream.ref;
+  const path = upstream.path.split("/").map(encodeURIComponent).join("/");
+  const url = `${GITHUB_API}/repos/${upstream.repository}/contents/${path}?ref=${encodeURIComponent(revision)}`;
+  const response = await fetchImpl(url, {
+    headers: {
+      Accept: "application/vnd.github.raw+json",
+      Authorization: `Bearer ${token ?? githubToken(upstream.repository)}`,
+      "User-Agent": "wathba-plugin-sync",
+      "X-GitHub-Api-Version": "2022-11-28",
+    },
+    signal: AbortSignal.timeout(20_000),
+  });
+  if (!response.ok)
+    fail("pull", `GitHub answered HTTP ${response.status} for ${upstream.repository}:${upstream.path} at ${revision}`);
+  return { bytes: Buffer.from(await response.arrayBuffer()), at: `${upstream.repository} ${revision}` };
+}
+
+/**
+ * Copies the server's skill into skill.source, records its sha256 and
+ * rebuilds the root output, after checking every rule on the new text: a
+ * skill the rules refuse changes nothing.
+ */
+async function pull(config, options) {
+  const { bytes, at } = await fetchUpstreamSkill(config.skill.upstream, options);
+  const next = structuredClone(config);
+  next.skill.upstream.sha256 = sha256(bytes);
+  const sources = await loadSources(next, bytes);
+  for (const name of ["prod", "dev"])
+    build(next, sources, name, name === "prod" ? next.version : `${next.version}-dev.0`);
+  const changed = next.skill.upstream.sha256 !== config.skill.upstream.sha256;
+  await writeFile(join(ROOT, next.skill.source), bytes);
+  await writeFile(join(ROOT, "plugin.config.json"), json(next));
+  await writeTree(ROOT, build(next, sources, next.rootTarget, next.version), next.rootTarget, next);
+  console.log(JSON.stringify({ pulled: at, sha256: next.skill.upstream.sha256, changed }));
+}
+
+/** Fails when the recorded skill is not the server's file, writing nothing. */
+async function verifyUpstream(config, options) {
+  const { bytes, at } = await fetchUpstreamSkill(config.skill.upstream, options);
+  const upstream = sha256(bytes);
+  if (upstream !== config.skill.upstream.sha256)
+    fail(
+      "upstream",
+      `the plugin's skill (sha256 ${config.skill.upstream.sha256}) is not the server's ` +
+        `${config.skill.upstream.path} at ${at} (sha256 ${upstream}): run \`node scripts/sync.mjs pull\``,
+    );
+  console.log(`verify-upstream: the plugin's skill is the server's (${at}, sha256 ${upstream})`);
+}
+
 function parseArgs(argv) {
   const [command, ...rest] = argv;
   const options = {};
@@ -874,6 +1008,14 @@ function parseArgs(argv) {
 async function main() {
   const { command, options } = parseArgs(process.argv.slice(2));
   const config = await loadConfig();
+  // These two read the server's skill, so they run while skill.source is stale.
+  if (command === "pull" || command === "verify-upstream") {
+    const known = ["from", "ref"];
+    const unknown = Object.keys(options).filter((key) => !known.includes(key));
+    if (unknown.length > 0) fail("usage", `${command} takes only --from and --ref`);
+    await (command === "pull" ? pull : verifyUpstream)(config, options);
+    return;
+  }
   const sources = await loadSources(config);
   const targetName = options.target;
   if (options.target !== undefined && !(targetName in config.targets))
@@ -911,7 +1053,7 @@ async function main() {
       break;
     }
     default:
-      fail("usage", "command must be build, check, digest or version-rule");
+      fail("usage", "command must be build, check, digest, version-rule, pull or verify-upstream");
   }
 }
 

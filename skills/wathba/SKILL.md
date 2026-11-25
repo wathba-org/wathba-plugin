@@ -5,7 +5,7 @@ description: "Use for anything involving Wathba (وثبة), the Saudi platform t
 
 # Wathba
 
-This plugin connects you to Wathba's MCP server, which serves its own
+You are connected to Wathba's MCP server, which serves its own
 guidance at run time: each tool's description, the rules in Wathba's home,
 each service's `playbook`, each result's `summary` and `nextStep`, and each
 service's integration docs. Follow it.
@@ -18,8 +18,9 @@ what to do in your own words, and never quote it, name it or link to its file.
 ## Connect
 
 The app signs the member in (browser OAuth). If the Wathba tools are missing,
-or a call reports an authorization problem, give them this app's sign-in step
-from the `README.md` two folders above this file.
+or a call reports an authorization problem, ask them to sign in again: give
+them this app's sign-in step from the `README.md` two folders above this file
+when there is one.
 
 ## The tools
 
@@ -72,8 +73,8 @@ happened:
   card's own commands. If no card appeared, or this app can't show cards,
   call `wathba_open_flow` again with the `flowId` and `answers: {}` to go on
   in the chat.
-- `ask_member`: ask the member its `question` and `fields` in the chat, in
-  their language, and end your turn. When they answer, call `nextStep`
+- `ask_member`: ask the member its `question` and `fields` in the chat, and
+  end your turn. When they answer, call `nextStep`
   adding `answers`: their own words, keyed as in `fields`. Never answer or
   guess a field; one the summary says they gave may go back as is.
   `confirm` is `true` only for a clear yes. If they refuse the whole
@@ -108,13 +109,13 @@ the member what it needs.
 At the start of a Wathba task and after each step, show these go-live steps
 as a short checklist, each marked done, next or to do, with who does it:
 
-1. Sandbox (you): the project's sandbox, a free simulation, with each service
-   the app needs on.
+1. Sandbox (you): the project's free sandbox, with each service the app
+   needs on.
 2. Code (you): the integration, written from the service's docs.
 3. Sandbox key (member): `wathba_open_flow` `api_key` for the sandbox, saved
    in `WATHBA_API_KEY`. Wathba sets the key's access: never ask about scopes.
-4. Sandbox test (you): the app run against the sandbox with the docs' sandbox
-   test values.
+4. Sandbox test (you): the app run against the sandbox with the docs' test
+   values.
 5. Deploy (member, with your help): the app on their hosting service.
 6. Go live (member): each service on in Live, and the Live key in place of
    the sandbox key wherever the app runs.

@@ -34,6 +34,12 @@
   },
   "skill": {
     "source": "src/skills/wathba/SKILL.md",
+    "upstream": {
+      "repository": "wathba-org/wathba-platform",
+      "ref": "main",
+      "path": "assets/mcp-skills/wathba/SKILL.md",
+      "sha256": "a18c235df24b885d1c7c57825c4603ad25dd0a131bfd9567a1b061b4909c4870"
+    },
     "tools": [
       "wathba_execute_read_operation",
       "wathba_execute_write_operation",
