@@ -14,9 +14,11 @@ ever goes through the chat.
 /plugin install wathba-dev@wathba-development
 ```
 
-Run `/mcp`, choose `wathba-dev` and sign in. To receive updates
-automatically, open `/plugin`, go to Marketplaces, select
-`wathba-development` and choose Enable auto-update.
+Run `/mcp`, choose `wathba-dev` and sign in. Where `/mcp` opens no
+panel (Claude Code inside another app), run
+`claude mcp login plugin:wathba-dev:wathba-dev` in a terminal
+instead. To receive updates automatically, open `/plugin`, go to
+Marketplaces, select `wathba-development` and choose Enable auto-update.
 
 ## Codex and the ChatGPT desktop app
 
