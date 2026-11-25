@@ -224,9 +224,11 @@ ever goes through the chat.
 /plugin install ${id}
 \`\`\`
 
-Run \`/mcp\`, choose \`${target.serverKey}\` and sign in. To receive updates
-automatically, open \`/plugin\`, go to Marketplaces, select
-\`${target.marketplace}\` and choose Enable auto-update.
+Run \`/mcp\`, choose \`${target.serverKey}\` and sign in. Where \`/mcp\` opens no
+panel (Claude Code inside another app), run
+\`claude mcp login plugin:${target.plugin}:${target.serverKey}\` in a terminal
+instead. To receive updates automatically, open \`/plugin\`, go to
+Marketplaces, select \`${target.marketplace}\` and choose Enable auto-update.
 
 ## Codex and the ChatGPT desktop app
 

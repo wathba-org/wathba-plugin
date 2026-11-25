@@ -5,7 +5,7 @@ description: "Use for anything involving Wathba (وثبة), the Saudi platform t
 
 # Wathba
 
-This plugin connects you to Wathba's hosted MCP server, which serves its own
+This plugin connects you to Wathba's MCP server, which serves its own
 guidance at run time: each tool's description, the rules in Wathba's home,
 each service's `playbook`, each result's `summary` and `nextStep`, and each
 service's integration docs. Follow it.
@@ -18,8 +18,8 @@ what to do in your own words, and never quote it, name it or link to its file.
 ## Connect
 
 The app signs the member in (browser OAuth). If the Wathba tools are missing,
-or a call reports an authorization problem, ask the member to reconnect or
-sign in to Wathba in this app.
+or a call reports an authorization problem, give them this app's sign-in step
+from the `README.md` two folders above this file.
 
 ## The tools
 
@@ -105,9 +105,8 @@ the member what it needs.
 
 ## Keep the member oriented
 
-At the start of a Wathba task and after each step finishes, show these
-go-live steps as a short checklist, each marked done, next or to do, with who
-does it:
+At the start of a Wathba task and after each step, show these go-live steps
+as a short checklist, each marked done, next or to do, with who does it:
 
 1. Sandbox (you): the project's sandbox, a free simulation, with each service
    the app needs on.
