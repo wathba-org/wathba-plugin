@@ -84,6 +84,31 @@ or scopes, environment isolation, no credentials, the skill's tool list, size
 and service codes, and the icon hash. `scripts/sync.test.mjs` unit tests the
 skill rules.
 
+### The skill is the server's
+
+Wathba's MCP server serves the same skill to hosts that load skills from a
+server (Claude Code and claude.ai), from
+`assets/mcp-skills/wathba/SKILL.md` in `wathba-org/wathba-platform`. The
+plugin ships that file byte for byte, so both say the same thing:
+
+- **Never edit `src/skills/wathba/SKILL.md` here.** Edit the platform's file,
+  then run `node scripts/sync.mjs pull`, which copies it, records its sha256 in
+  `skill.upstream` in `plugin.config.json`, and rebuilds the root output.
+  Every other command fails on a copy whose sha256 is not the recorded one.
+- `pull` and `verify-upstream` (which compares without writing) read the file
+  from GitHub, using `GH_TOKEN`, `GITHUB_TOKEN` or `gh auth token`, because the
+  platform repository is private. Or they read a checkout's git:
+  `--from ../wathba-platform`, at `origin/main` unless `--ref` names another
+  commit or branch. They never read a checkout's working tree.
+- **Change both on paired branches.** Name the plugin branch exactly like the
+  platform branch. The platform's CI compares its skill with this repository's
+  `dev` branch, or with the paired branch while the platform pull request is
+  open, and fails while they differ. Merge the plugin pull request first, then
+  the platform one right after it: other platform pull requests fail between
+  the two merges.
+- **One text for DEV and production.** The server sends one file to both, so
+  the skill has no `<!-- dev-only -->` blocks; `check` refuses them.
+
 ### The skill is a router
 
 The skill never changes when Wathba adds a service, a flow, an operation or a
@@ -123,7 +148,8 @@ that allows.
 
 Changes reach DEV first and production later, like the platform.
 
-1. Branch from `dev` and edit `plugin.config.json` or `src/`.
+1. Branch from `dev` and edit `plugin.config.json` or `src/`. A skill
+   change starts in the platform; see [The skill is the server's](#the-skill-is-the-servers).
 2. Run `node --test scripts/*.test.mjs` and `node scripts/sync.mjs check`.
 3. Open a pull request into `dev`. When it merges, `publish-dev` publishes
    it to DEV agents as `<version>-dev.<run>`. No version bump is needed here.

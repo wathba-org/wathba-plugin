@@ -5,7 +5,7 @@ description: "Use for anything involving Wathba (وثبة), the Saudi platform t
 
 # Wathba
 
-This plugin connects you to Wathba's hosted MCP server, which serves its own
+You are connected to Wathba's hosted MCP server, which serves its own
 guidance at run time: each tool's description, the rules in Wathba's home,
 each service's `playbook`, each result's `summary` and `nextStep`, and each
 service's integration docs. Follow it.

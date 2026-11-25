@@ -3,6 +3,7 @@
 
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -11,12 +12,13 @@ import { describe, test } from "node:test";
 import {
   build,
   checkSkill,
+  checkUpstreamCopy,
+  fetchUpstreamSkill,
   loadConfig,
   loadSources,
   RuleError,
   serviceCodesIn,
   SKILL_MAX_BYTES,
-  skillFor,
   validate,
 } from "./sync.mjs";
 
@@ -89,11 +91,8 @@ describe("the committed skill", () => {
   test("passes every skill rule in both targets and fits the cap", async () => {
     const real = await loadConfig();
     const { skill: source } = await loadSources(real);
-    for (const target of ["prod", "dev"]) {
-      const built = skillFor(source, target);
-      checkSkill(built, real, target);
-      assert.ok(Buffer.byteLength(built) <= SKILL_MAX_BYTES, `${target} is over the cap`);
-    }
+    for (const target of ["prod", "dev"]) checkSkill(source, real, target);
+    assert.ok(Buffer.byteLength(source) <= SKILL_MAX_BYTES, "over the cap");
   });
 
   test("relies on exactly the four listed tools", async () => {
@@ -134,13 +133,6 @@ describe("byte cap", () => {
     assert.ok(Buffer.byteLength(arabic) > SKILL_MAX_BYTES, "over the cap in bytes");
     fails(arabic, /over the 8000-byte cap/);
   });
-
-  test("applies to the DEV build too", () => {
-    const over = "x".repeat(SKILL_MAX_BYTES);
-    const source = skill(`<!-- dev-only: DEV only -->\n${over}\n<!-- /dev-only -->\n`);
-    passes(skillFor(source, "prod"), "prod");
-    fails(skillFor(source, "dev"), /the built dev SKILL\.md is \d+ bytes/, "dev");
-  });
 });
 
 describe("service codes", () => {
@@ -169,12 +161,6 @@ describe("service codes", () => {
 
   test("fails on one in the frontmatter description", () => {
     fails(skill("", "Use for Wathba, such as payments.moyasar."), /names payments\.moyasar,/);
-  });
-
-  test("fails on one in a dev-only block of the DEV build", () => {
-    const source = skill("<!-- dev-only: DEV only -->\nThe service shipping.torod.\n<!-- /dev-only -->\n");
-    passes(skillFor(source, "prod"), "prod");
-    fails(skillFor(source, "dev"), /names shipping\.torod,/, "dev");
   });
 
   test("ignores prose, versions, paths, URLs, file names and e-mail addresses", () => {
@@ -235,6 +221,167 @@ describe("declared tools", () => {
 
   test("allow a declared non-tool term", () => {
     passes(skill("The outcome `card_opened` means a card is on screen.\n"));
+  });
+});
+
+// The skill is the server's (wathba-platform's skill.upstream.path): pull
+// copies it byte for byte, and every command refuses a copy edited by hand.
+describe("the server's skill", () => {
+  const upstream = {
+    repository: "wathba-org/wathba-platform",
+    ref: "main",
+    path: "assets/mcp-skills/wathba/SKILL.md",
+  };
+  const hash = (text) => createHash("sha256").update(text).digest("hex");
+
+  function git(dir, ...args) {
+    return execFileSync("git", ["-C", dir, "-c", "user.name=test", "-c", "user.email=test@example.com", ...args], {
+      encoding: "utf8",
+    });
+  }
+
+  /** A wathba-platform stand-in: a git repository with `text` committed at the skill's path. */
+  function platformWith(text) {
+    const dir = mkdtempSync(join(tmpdir(), "wathba-platform-"));
+    git(dir, "init", "-q", "-b", "main");
+    mkdirSync(join(dir, "assets/mcp-skills/wathba"), { recursive: true });
+    writeFileSync(join(dir, upstream.path), text);
+    git(dir, "add", "-A");
+    git(dir, "commit", "-q", "-m", "skill");
+    return dir;
+  }
+
+  /** A copy of this repository to run sync.mjs in, and the CLI bound to it. */
+  function pluginCopy() {
+    const dir = mkdtempSync(join(tmpdir(), "wathba-plugin-"));
+    cpSync(ROOT, dir, { recursive: true, filter: (source) => !/[\\/](\.git|node_modules)$/.test(source) });
+    const run = (...args) =>
+      execFileSync(process.execPath, [join(dir, "scripts/sync.mjs"), ...args], {
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "pipe"],
+      });
+    return { dir, run };
+  }
+
+  test("the committed skill is the recorded copy of the server's file", async () => {
+    const real = await loadConfig();
+    const { sha256, ...where } = real.skill.upstream;
+    assert.deepEqual(where, upstream);
+    assert.equal(hash(readFileSync(join(ROOT, real.skill.source))), sha256);
+    assert.doesNotThrow(() => checkUpstreamCopy(readFileSync(join(ROOT, real.skill.source)), real));
+  });
+
+  test("every command refuses a skill edited by hand", async () => {
+    const real = await loadConfig();
+    const edited = Buffer.concat([readFileSync(join(ROOT, real.skill.source)), Buffer.from("Extra.\n")]);
+    await assert.rejects(
+      loadSources(real, edited),
+      (error) =>
+        error instanceof RuleError &&
+        /is not the skill Wathba's server serves/.test(error.message) &&
+        /edit assets\/mcp-skills\/wathba\/SKILL\.md in wathba-org\/wathba-platform/.test(error.message),
+    );
+  });
+
+  test("refuses a dev-only marker: the server sends one skill to DEV and production", () => {
+    for (const target of ["prod", "dev"]) {
+      fails(skill("<!-- dev-only: DEV only -->\nText.\n<!-- /dev-only -->\n"), /dev-only marker/, target);
+      fails(skill("<!-- /dev-only -->\n"), /dev-only marker/, target);
+    }
+    passes(skill("Some text is dev-only in other products.\n"));
+  });
+
+  test("reads a checkout's committed file, never its working tree", async () => {
+    const dir = platformWith(skill("Committed.\n"));
+    try {
+      writeFileSync(join(dir, upstream.path), skill("Not committed.\n"));
+      const { bytes, at } = await fetchUpstreamSkill(upstream, { from: dir, ref: "HEAD" });
+      assert.equal(bytes.toString("utf8"), skill("Committed.\n"));
+      assert.match(at, / HEAD \([0-9a-f]+\)$/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("reads origin/<ref> of a checkout by default, and names what it can't read", async () => {
+    const dir = platformWith(skill());
+    try {
+      await assert.rejects(
+        fetchUpstreamSkill(upstream, { from: dir }),
+        (error) =>
+          error instanceof RuleError &&
+          /can't read origin\/main:assets\/mcp-skills\/wathba\/SKILL\.md/.test(error.message),
+      );
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("reads GitHub's contents API raw, with the token, at the ref", async () => {
+    const calls = [];
+    const fetchImpl = async (url, init) => {
+      calls.push({ url, headers: init.headers });
+      return new Response("the skill");
+    };
+    const { bytes } = await fetchUpstreamSkill(upstream, { token: "t0ken", fetchImpl });
+    assert.equal(bytes.toString("utf8"), "the skill");
+    assert.equal(
+      calls[0].url,
+      "https://api.github.com/repos/wathba-org/wathba-platform/contents/assets/mcp-skills/wathba/SKILL.md?ref=main",
+    );
+    assert.equal(calls[0].headers.Authorization, "Bearer t0ken");
+    assert.equal(calls[0].headers.Accept, "application/vnd.github.raw+json");
+    await fetchUpstreamSkill(upstream, { token: "t0ken", fetchImpl, ref: "juriba/a-branch" });
+    assert.match(calls[1].url, /\?ref=juriba%2Fa-branch$/);
+    await assert.rejects(
+      fetchUpstreamSkill(upstream, { token: "t0ken", fetchImpl: async () => new Response("", { status: 404 }) }),
+      (error) => error instanceof RuleError && /HTTP 404 for wathba-org\/wathba-platform:.* at main/.test(error.message),
+    );
+  });
+
+  test("pull copies the server's skill, records it and rebuilds; check then refuses a hand edit", () => {
+    const current = readFileSync(join(ROOT, "src/skills/wathba/SKILL.md"), "utf8");
+    const changed = `${current}Ok.\n`;
+    const platform = platformWith(changed);
+    const { dir, run } = pluginCopy();
+    try {
+      assert.throws(() => run("verify-upstream", "--from", platform, "--ref", "HEAD"), /is not the server's/);
+      const first = JSON.parse(run("pull", "--from", platform, "--ref", "HEAD"));
+      assert.deepEqual([first.changed, first.sha256], [true, hash(changed)]);
+      const config = JSON.parse(readFileSync(join(dir, "plugin.config.json"), "utf8"));
+      assert.equal(config.skill.upstream.sha256, hash(changed));
+      for (const path of [config.skill.source, "plugins/wathba/skills/wathba/SKILL.md", "skills/wathba/SKILL.md"])
+        assert.equal(readFileSync(join(dir, path), "utf8"), changed, path);
+      run("check");
+      run("verify-upstream", "--from", platform, "--ref", "HEAD");
+      assert.equal(JSON.parse(run("pull", "--from", platform, "--ref", "HEAD")).changed, false);
+      writeFileSync(join(dir, config.skill.source), `${changed}By hand.\n`);
+      assert.throws(() => run("check"), /is not the skill Wathba's server serves/);
+    } finally {
+      rmSync(platform, { recursive: true, force: true });
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("pull writes nothing when the rules refuse the server's skill", () => {
+    const current = readFileSync(join(ROOT, "src/skills/wathba/SKILL.md"), "utf8");
+    // Under the byte cap, so the service-code rule is the one that refuses it.
+    assert.ok(current.includes("\n# Wathba\n"));
+    const platform = platformWith(current.replace("\n# Wathba\n", "\n# payments.moyasar\n"));
+    const { dir, run } = pluginCopy();
+    const before = ["plugin.config.json", "src/skills/wathba/SKILL.md", "skills/wathba/SKILL.md"].map((path) =>
+      readFileSync(join(dir, path), "utf8"),
+    );
+    try {
+      assert.throws(() => run("pull", "--from", platform, "--ref", "HEAD"), /names payments\.moyasar/);
+      const after = ["plugin.config.json", "src/skills/wathba/SKILL.md", "skills/wathba/SKILL.md"].map((path) =>
+        readFileSync(join(dir, path), "utf8"),
+      );
+      assert.deepEqual(after, before);
+    } finally {
+      rmSync(platform, { recursive: true, force: true });
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });
 
