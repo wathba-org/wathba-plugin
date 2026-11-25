@@ -22,8 +22,11 @@ sign in through the browser (OAuth).
 
 For the development environment, add `wathba-org/wathba-plugin#dev-marketplace` and
 install `wathba-dev@wathba-development`. Then run `/mcp`, choose the Wathba
-server and sign in. To get updates automatically, open `/plugin`, go to
-Marketplaces, select the marketplace and choose Enable auto-update.
+server and sign in. Where `/mcp` opens no panel (Claude Code inside another
+app), run `claude mcp login plugin:wathba:wathba` in a terminal instead
+(`plugin:wathba-dev:wathba-dev` for development). To get updates
+automatically, open `/plugin`, go to Marketplaces, select the marketplace and
+choose Enable auto-update.
 
 ### Codex and the ChatGPT desktop app
 

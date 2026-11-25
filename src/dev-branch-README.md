@@ -13,7 +13,9 @@ It points at the Wathba development environment (`https://apidev.wathba.sa/mcp`)
 /plugin install wathba-dev@wathba-development
 ```
 
-Then run `/mcp`, choose `wathba-dev` and sign in. Turn on updates under
+Then run `/mcp`, choose `wathba-dev` and sign in. Where `/mcp` opens no panel
+(Claude Code inside another app), run
+`claude mcp login plugin:wathba-dev:wathba-dev` in a terminal instead. Turn on updates under
 `/plugin` → Marketplaces → `wathba-development` → Enable auto-update.
 
 ## Codex and the ChatGPT desktop app

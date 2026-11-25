@@ -38,7 +38,7 @@
       "repository": "wathba-org/wathba-platform",
       "ref": "main",
       "path": "assets/mcp-skills/wathba/SKILL.md",
-      "sha256": "dd586f7068c4afff69f545a812e2ad2c7a0f92e7c3706341870133c6dd3e07a0"
+      "sha256": "a18c235df24b885d1c7c57825c4603ad25dd0a131bfd9567a1b061b4909c4870"
     },
     "tools": [
       "wathba_execute_read_operation",
